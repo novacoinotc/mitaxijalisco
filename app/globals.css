@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #05070d;
+  --foreground: #e9f1ff;
+}
+
+html, body { background: var(--background); color: var(--foreground); }
+body {
+  font-family: var(--font-sans), system-ui, sans-serif;
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(34,233,255,0.18), transparent 60%),
+    radial-gradient(900px 500px at 110% 10%, rgba(255,43,214,0.12), transparent 60%),
+    radial-gradient(700px 400px at 50% 120%, rgba(139,92,246,0.15), transparent 60%),
+    #05070d;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+@layer utilities {
+  .text-gradient {
+    background: linear-gradient(90deg, #22e9ff, #8b5cf6 40%, #ff2bd6 80%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: gradient-x 6s ease infinite;
+  }
+  .glass {
+    background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.08);
+    backdrop-filter: blur(14px);
+  }
+  .glow {
+    box-shadow: 0 0 40px rgba(34,233,255,0.25), 0 0 120px rgba(139,92,246,0.15);
+  }
+  .grid-bg {
+    background-image:
+      linear-gradient(rgba(34,233,255,0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(34,233,255,0.08) 1px, transparent 1px);
+    background-size: 40px 40px;
+    mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+  }
+  .noise::before {
+    content: "";
+    position: absolute; inset: 0; pointer-events: none; opacity: 0.05;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence baseFrequency='0.9'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+}
+
+.scroll-smooth { scroll-behavior: smooth; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #05070d; }
+::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #22e9ff, #8b5cf6); border-radius: 10px; }
