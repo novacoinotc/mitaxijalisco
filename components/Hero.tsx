@@ -30,10 +30,10 @@ export default function Hero() {
 
           <div className="mt-10 flex flex-wrap items-center gap-4">
             <Link
-              href="#demo"
+              href="/app"
               className="group inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-neon-cyan to-neon-violet px-6 py-3.5 text-base font-semibold text-black hover:opacity-90 glow"
             >
-              Ver demo en vivo
+              🎮 Probar la app en vivo
               <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
             </Link>
             <Link

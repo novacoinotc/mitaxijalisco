@@ -25,6 +25,7 @@ export default function Navbar() {
             <a href="#servicios" className="hover:text-white">Servicios</a>
             <a href="#demo" className="hover:text-white">Demo</a>
             <a href="#registro" className="hover:text-white">Registro</a>
+            <Link href="/app" className="text-neon-cyan hover:text-white font-semibold">🎮 Probar app</Link>
             <Link href="/usuario" className="hover:text-white">Usuario</Link>
             <Link href="/conductor" className="hover:text-white">Conductor</Link>
             <Link href="/admin" className="hover:text-white">Admin</Link>
