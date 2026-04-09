@@ -20,7 +20,7 @@ export default function Navbar() {
           </Link>
           <nav className="hidden md:flex items-center gap-6 text-sm text-white/80">
             <a href="#features" className="hover:text-white">Funciones</a>
-            <a href="#comparativa" className="hover:text-white">vs Uber</a>
+            <a href="#comparativa" className="hover:text-white">vs la competencia</a>
             <a href="#seguridad" className="hover:text-white">Seguridad</a>
             <a href="#servicios" className="hover:text-white">Servicios</a>
             <a href="#demo" className="hover:text-white">Demo</a>

@@ -1,6 +1,6 @@
 # Mi Taxi Jalisco
 
-Landing page futurista + demo interactiva de la plataforma **Mi Taxi Jalisco**, una alternativa mexicana a Uber con 10% de comisión, seguridad conectada al C5 y soporte para taxis formales, informales y autos particulares.
+Landing page futurista + demo interactiva de la plataforma **Mi Taxi Jalisco**, una alternativa mexicana hecha por y para jaliscienses con 10% de comisión, seguridad conectada al C5 y soporte para taxis formales, informales y autos particulares.
 
 ## Stack
 - Next.js 15 (App Router, Turbopack)
@@ -20,7 +20,7 @@ Abre http://localhost:3000
 - `app/page.tsx` — landing
 - `components/Hero.tsx` — hero + mockup flotante
 - `components/Features.tsx` — 14 funciones diferenciadoras
-- `components/Compare.tsx` — tabla vs Uber
+- `components/Compare.tsx` — tabla vs la competencia
 - `components/Security.tsx` — capa de seguridad (C5)
 - `components/Demo.tsx` — simulador interactivo pasajero/conductor
 - `components/Register.tsx` — formulario registro dual
@@ -30,11 +30,11 @@ Abre http://localhost:3000
 vercel
 ```
 
-## Propuesta de mejoras vs Uber (resumen ejecutivo)
+## Propuesta de mejoras vs la competencia (resumen ejecutivo)
 
 ### Económicas
-1. **Comisión 10%** vs 30% de Uber.
-2. **Pago al día siguiente** (Uber: hasta 7 días).
+1. **Comisión 10%** vs 30% de la competencia.
+2. **Pago al día siguiente** (La competencia: hasta 7 días).
 3. **Propina 100% al conductor**.
 4. **Sin tarifas dinámicas abusivas** — máximo +20% en horas pico.
 5. **Primeros 1,000 conductores: 0% comisión los primeros 3 meses.**

@@ -8,7 +8,7 @@ export default function Footer() {
             <span className="font-display font-bold">Mi Taxi <span className="text-gradient">Jalisco</span></span>
           </div>
           <p className="mt-2 text-sm text-white/50 max-w-md">
-            Hecho con 🤍 en Guadalajara. Una alternativa mexicana a Uber, con comisiones justas y seguridad real.
+            Hecho con 🤍 en Guadalajara. Una alternativa mexicana hecha por y para jaliscienses, con comisiones justas y seguridad real.
           </p>
         </div>
         <div className="text-xs text-white/40">© {new Date().getFullYear()} Mi Taxi Jalisco · Prototipo demo</div>

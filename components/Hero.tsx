@@ -19,12 +19,12 @@ export default function Hero() {
             Hecho en Jalisco · Impulsado por conductores mexicanos
           </div>
           <h1 className="font-display text-5xl md:text-7xl font-bold leading-[1.05] tracking-tight">
-            La movilidad <span className="text-gradient">ya no es de Uber.</span>
+            La movilidad <span className="text-gradient">ya no es de la competencia.</span>
             <br />
             Es tuya, es de Jalisco.
           </h1>
           <p className="mt-6 text-lg md:text-xl text-white/70 max-w-2xl">
-            Mi Taxi Jalisco le devuelve el control a los conductores: <b className="text-white">solo 10% de comisión</b> vs el 30% de Uber.
+            Mi Taxi Jalisco le devuelve el control a los conductores: <b className="text-white">solo 10% de comisión</b> vs el 30% de la competencia.
             Taxis formales, informales y autos particulares — todos en una sola plataforma, con seguridad de nivel bancario y precios más justos para el pasajero.
           </p>
 
@@ -48,7 +48,7 @@ export default function Hero() {
             {[
               { icon: TrendingUp, k: "90%", v: "para el conductor" },
               { icon: ShieldCheck, k: "24/7", v: "botón de pánico + rastreo" },
-              { icon: Sparkles, k: "-20%", v: "vs tarifas Uber" },
+              { icon: Sparkles, k: "-20%", v: "vs tarifas la competencia" },
             ].map(({ icon: Icon, k, v }, i) => (
               <motion.div
                 key={k}

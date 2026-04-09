@@ -24,7 +24,7 @@ export default async function UsuarioHome() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Stat label="Viajes totales" value={trips.length} color="cyan" />
         <Stat label="Gastado" value={`$${totalSpent.toFixed(0)}`} color="violet" />
-        <Stat label="Ahorrado vs Uber" value={`$${(totalSpent * 0.23).toFixed(0)}`} color="lime" />
+        <Stat label="Ahorrado vs la competencia" value={`$${(totalSpent * 0.23).toFixed(0)}`} color="lime" />
         <Stat label="CO₂ evitado" value="12 kg" color="pink" />
       </div>
 

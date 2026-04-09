@@ -409,7 +409,7 @@ function FareScreen() {
           <span className="font-semibold">Total</span>
           <span className="font-display text-xl font-bold text-gradient">$68.00</span>
         </div>
-        <div className="text-[10px] text-neon-lime">💰 Uber cobraría ~$89 · Ahorras $21</div>
+        <div className="text-[10px] text-neon-lime">💰 La competencia cobraría ~$89 · Ahorras $21</div>
       </div>
       <div className="mt-3 glass rounded-xl p-3 flex items-center gap-3">
         <CreditCard className="h-4 w-4 text-neon-cyan" />
@@ -720,7 +720,7 @@ function DoneScreen() {
       </div>
 
       <div className="mt-3 w-full glass rounded-xl p-3 bg-neon-lime/5 border-neon-lime/20">
-        <div className="text-[10px] text-neon-lime font-semibold">💰 Ahorro comparado con Uber</div>
+        <div className="text-[10px] text-neon-lime font-semibold">💰 Ahorro comparado con la competencia</div>
         <div className="font-display text-xl font-bold text-gradient">$21 + $25 extra al conductor</div>
       </div>
 
@@ -747,7 +747,7 @@ function ExplainerPanel({ stage }: { stage: Stage }) {
     },
     pickup: {
       title: "Origen y destino con hasta 5 paradas",
-      sub: "Buscador inteligente con autocompletado de direcciones reales de la ZMG. Puedes agregar paradas intermedias sin pagar el doble como en Uber.",
+      sub: "Buscador inteligente con autocompletado de direcciones reales de la ZMG. Puedes agregar paradas intermedias sin pagar el doble como en la competencia.",
       points: [
         { icon: MapPin, t: "Autocompletado local", d: "Base de datos de calles y comercios de Guadalajara, Zapopan, Tlaquepaque y Tonalá." },
         { icon: Users, t: "Hasta 5 paradas", d: "Perfecto para dejar al niño en la escuela y luego ir al trabajo." },
@@ -767,14 +767,14 @@ function ExplainerPanel({ stage }: { stage: Stage }) {
       title: "Tarifa transparente, sin sorpresas",
       sub: "Ves el desglose completo: tarifa base + distancia. Sin 'tarifa dinámica' abusiva — máximo +20% en horas pico, comunicado claramente.",
       points: [
-        { icon: CheckCircle2, t: "Ahorro vs Uber", d: "Mostramos cuánto más barato es el mismo viaje comparado con la competencia." },
+        { icon: CheckCircle2, t: "Ahorro vs la competencia", d: "Mostramos cuánto más barato es el mismo viaje comparado con la competencia." },
         { icon: CreditCard, t: "5 métodos de pago", d: "Tarjeta, efectivo, CoDi, SPEI, Mercado Pago, vales de despensa." },
         { icon: Gift, t: "Cupones locales", d: "Promociones reales con comercios de Jalisco." },
       ],
     },
     searching: {
       title: "Match inteligente con algoritmo local",
-      sub: "Usamos IA entrenada con datos reales de tráfico y zonas de GDL. No es un algoritmo genérico de Silicon Valley.",
+      sub: "Usamos IA entrenada con datos reales de tráfico y zonas de GDL. No es un algoritmo genérico de empresas extranjeras.",
       points: [
         { icon: Radar, t: "Prioriza cercanía real", d: "Considera tráfico, sentido de calles y conocimiento del conductor de la zona." },
         { icon: Star, t: "Filtra por rating", d: "Solo conductores con rating ≥ 4.8 son propuestos por default." },
@@ -830,7 +830,7 @@ function ExplainerPanel({ stage }: { stage: Stage }) {
       title: "Pago fácil, como tú quieras",
       sub: "Acepta tarjeta, efectivo (sin cargo extra), CoDi, SPEI, Mercado Pago y vales de despensa. El conductor no toca dinero si no quiere.",
       points: [
-        { icon: CreditCard, t: "Sin comisión por efectivo", d: "Uber cobra extra por pagar en efectivo. Aquí no." },
+        { icon: CreditCard, t: "Sin comisión por efectivo", d: "La competencia cobra extra por pagar en efectivo. Aquí no." },
         { icon: Smartphone, t: "CoDi nativo", d: "Pago banco-a-banco con QR, sin comisiones." },
         { icon: CheckCircle2, t: "Recibo instantáneo", d: "Llega a tu correo en segundos, listo para deducir si usas la app por trabajo." },
       ],
@@ -841,7 +841,7 @@ function ExplainerPanel({ stage }: { stage: Stage }) {
       points: [
         { icon: Star, t: "Rating granular", d: "Califica amabilidad, manejo, limpieza, puntualidad por separado." },
         { icon: ThumbsUp, t: "Etiquetas rápidas", d: "6 tags para reconocer lo bueno: '👍 Amable', '🧼 Limpio', '🕐 Puntual'..." },
-        { icon: Heart, t: "Propina 100% para él", d: "Uber se queda con parte de la propina. Aquí ni un peso." },
+        { icon: Heart, t: "Propina 100% para él", d: "La competencia se queda con parte de la propina. Aquí ni un peso." },
       ],
     },
     review: {
@@ -855,11 +855,11 @@ function ExplainerPanel({ stage }: { stage: Stage }) {
     },
     done: {
       title: "Viaje completado — ganamos todos",
-      sub: "Tú ahorraste $21 vs Uber. Don Roberto recibe $25 más de lo que hubiera ganado en Uber. La propina es 100% suya. Ganaste 120 puntos de lealtad.",
+      sub: "Tú ahorraste $21 vs la competencia. Don Roberto recibe $25 más de lo que hubiera ganado en la competencia. La propina es 100% suya. Ganaste 120 puntos de lealtad.",
       points: [
-        { icon: Banknote, t: "Don Roberto cobra mañana", d: "Pago automático a su cuenta BBVA en 24 horas. Uber tarda hasta 7 días." },
+        { icon: Banknote, t: "Don Roberto cobra mañana", d: "Pago automático a su cuenta BBVA en 24 horas. Otras apps tardan hasta 7 días." },
         { icon: Gift, t: "Puntos canjeables", d: "Tus 120 pts los puedes usar en farmacias, tiendas y restaurantes locales." },
-        { icon: Heart, t: "Impacto real", d: "El 90% de tu dinero se quedó en Jalisco, con un conductor local. No en Silicon Valley." },
+        { icon: Heart, t: "Impacto real", d: "El 90% de tu dinero se quedó en Jalisco, con un conductor local. No en empresas extranjeras." },
       ],
     },
   };

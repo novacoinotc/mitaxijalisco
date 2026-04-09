@@ -17,7 +17,7 @@ const features = [
   { icon: Bell, t: "Alertas familiares", d: "Comparte el viaje en vivo con mamá, pareja o amigos con un toque." },
   { icon: Languages, t: "Español + wixárika + inglés", d: "La primera app de movilidad que respeta las lenguas originarias de Jalisco." },
   { icon: Heart, t: "Programa de salud", d: "Seguro de gastos médicos y dental para conductores activos sin costo extra." },
-  { icon: Zap, t: "Pagos en 24h", d: "El conductor cobra al día siguiente. Uber tarda hasta una semana." },
+  { icon: Zap, t: "Pagos en 24h", d: "El conductor cobra al día siguiente. Otras apps tardan hasta una semana." },
   { icon: MapPin, t: "Paradas múltiples", d: "Hasta 5 paradas en un mismo viaje sin pagar el doble." },
   { icon: ShieldCheck, t: "Seguro de viaje incluido", d: "Cobertura para pasajero y conductor en cada trayecto, sin costo adicional." },
 ];
@@ -32,9 +32,9 @@ export default function Features() {
           viewport={{ once: true }}
           className="max-w-3xl"
         >
-          <div className="text-xs uppercase tracking-[0.25em] text-neon-cyan mb-3">Lo que Uber no te da</div>
+          <div className="text-xs uppercase tracking-[0.25em] text-neon-cyan mb-3">Lo que la competencia no te da</div>
           <h2 className="font-display text-4xl md:text-5xl font-bold">
-            Funciones pensadas <span className="text-gradient">para México</span>,<br /> no para Silicon Valley.
+            Funciones pensadas <span className="text-gradient">para México</span>,<br /> no para empresas extranjeras.
           </h2>
           <p className="mt-4 text-white/70 text-lg">
             Cada función nació escuchando a taxistas de Guadalajara y usuarios reales. Aquí no copiamos — mejoramos.

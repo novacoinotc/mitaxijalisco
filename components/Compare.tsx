@@ -27,7 +27,7 @@ export default function Compare() {
         >
           <div className="text-xs uppercase tracking-[0.25em] text-neon-pink mb-3">Comparativa honesta</div>
           <h2 className="font-display text-4xl md:text-5xl font-bold">
-            Mi Taxi Jalisco <span className="text-gradient">vs</span> Uber
+            Mi Taxi Jalisco <span className="text-gradient">vs</span> la competencia
           </h2>
         </motion.div>
 
@@ -37,7 +37,7 @@ export default function Compare() {
             <div className="p-5 bg-gradient-to-b from-neon-cyan/10 to-transparent text-white">
               🇲🇽 Mi Taxi Jalisco
             </div>
-            <div className="p-5 text-white/50">Uber</div>
+            <div className="p-5 text-white/50">la competencia</div>
           </div>
           {rows.map(([label, a, b], i) => (
             <motion.div

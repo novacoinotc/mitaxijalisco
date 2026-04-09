@@ -507,7 +507,7 @@ function ServicePicker({ trip, setTrip }: { trip: TripState; setTrip: (u: TripSt
       </div>
       <div className="mt-2 flex items-center justify-between text-[10px] text-white/60">
         <span>Método: BBVA •••• 4821</span>
-        <span className="text-neon-lime">Uber: ${Math.round(trip.fare * 1.31)} · Ahorras ${Math.round(trip.fare * 0.31)}</span>
+        <span className="text-neon-lime">La competencia: ${Math.round(trip.fare * 1.31)} · Ahorras ${Math.round(trip.fare * 0.31)}</span>
       </div>
       <button
         onClick={() => {
@@ -540,7 +540,7 @@ function PassengerHistory() {
   return (
     <div className="h-full flex flex-col pb-20">
       <div className="font-display text-lg font-bold">Tu historial</div>
-      <div className="text-[10px] text-white/60">28 viajes · $4,820 gastado · $1,108 ahorrado vs Uber</div>
+      <div className="text-[10px] text-white/60">28 viajes · $4,820 gastado · $1,108 ahorrado vs la competencia</div>
       <div className="mt-3 space-y-2 overflow-y-auto flex-1">
         {trips.map((t, i) => (
           <div key={i} className="glass rounded-xl p-3">
@@ -812,7 +812,7 @@ function DriverHome({ trip, setTrip, online, setOnline }: { trip: TripState; set
               <div className="font-bold text-neon-lime">+${trip.tipAmount}</div>
             </div>
           )}
-          <div className="mt-2 text-[9px] text-neon-lime">💰 En Uber hubieras recibido ${Math.round(trip.fare * 0.7)}</div>
+          <div className="mt-2 text-[9px] text-neon-lime">💰 En la competencia hubieras recibido ${Math.round(trip.fare * 0.7)}</div>
         </div>
         <div className="mt-3 text-[10px] text-white/50">Pago a BBVA •••• 4821 en 24h</div>
       </div>
@@ -830,7 +830,7 @@ function DriverEarnings() {
       <div className="mt-3 glass rounded-2xl p-4 bg-gradient-to-br from-neon-lime/10 to-transparent border-neon-lime/30">
         <div className="text-[10px] text-white/60">Esta semana</div>
         <div className="font-display text-3xl font-bold text-gradient">$5,428</div>
-        <div className="text-[10px] text-neon-lime">+$1,230 vs Uber</div>
+        <div className="text-[10px] text-neon-lime">+$1,230 vs la competencia</div>
       </div>
       <div className="mt-3 grid grid-cols-2 gap-2">
         <div className="glass rounded-xl p-3"><div className="text-[10px] text-white/50">Hoy</div><div className="font-bold">$842</div></div>
