@@ -157,21 +157,21 @@ function PhoneFrame({ children }: { children: React.ReactNode }) {
 
 function GdlMap({ progress = 0, showRoute = true, sosRing = false, car = true }: { progress?: number; showRoute?: boolean; sosRing?: boolean; car?: boolean }) {
   return (
-    <div className="rounded-2xl overflow-hidden border border-white/10 h-[200px] relative bg-gradient-to-br from-[#0a1420] to-[#081020]">
+    <div className="rounded-2xl overflow-hidden border border-white/10 h-[200px] relative bg-gradient-to-br from-[#1a0a00] to-[#0a0500]">
       <svg className="absolute inset-0 w-full h-full" viewBox="0 0 360 260" preserveAspectRatio="none">
         <defs>
           <linearGradient id="rt" x1="0" y1="0" x2="1" y2="1">
-            <stop stopColor="#22e9ff" />
-            <stop offset="1" stopColor="#8b5cf6" />
+            <stop stopColor="#ea6a1a" />
+            <stop offset="1" stopColor="#7c2d12" />
           </linearGradient>
           <pattern id="grid2" width="28" height="28" patternUnits="userSpaceOnUse">
-            <path d="M 28 0 L 0 0 0 28" fill="none" stroke="rgba(34,233,255,0.08)" strokeWidth="1" />
+            <path d="M 28 0 L 0 0 0 28" fill="none" stroke="rgba(234,106,26,0.08)" strokeWidth="1" />
           </pattern>
         </defs>
         <rect width="360" height="260" fill="url(#grid2)" />
-        <ellipse cx="80" cy="70" rx="40" ry="22" fill="rgba(182,255,60,0.08)" stroke="rgba(182,255,60,0.2)" />
-        <text x="80" y="74" textAnchor="middle" fontSize="7" fill="rgba(182,255,60,0.7)">P. Metropolitano</text>
-        <ellipse cx="280" cy="55" rx="35" ry="18" fill="rgba(182,255,60,0.08)" stroke="rgba(182,255,60,0.2)" />
+        <ellipse cx="80" cy="70" rx="40" ry="22" fill="rgba(251,191,36,0.08)" stroke="rgba(251,191,36,0.2)" />
+        <text x="80" y="74" textAnchor="middle" fontSize="7" fill="rgba(251,191,36,0.7)">P. Metropolitano</text>
+        <ellipse cx="280" cy="55" rx="35" ry="18" fill="rgba(251,191,36,0.08)" stroke="rgba(251,191,36,0.2)" />
         <line x1="0" y1="180" x2="360" y2="160" stroke="rgba(255,255,255,0.18)" strokeWidth="3" />
         <line x1="0" y1="130" x2="360" y2="120" stroke="rgba(255,255,255,0.15)" strokeWidth="2.5" />
         <line x1="90" y1="0" x2="110" y2="260" stroke="rgba(255,255,255,0.15)" strokeWidth="2.5" />
@@ -180,10 +180,10 @@ function GdlMap({ progress = 0, showRoute = true, sosRing = false, car = true }:
           <path d="M 100 210 Q 140 190 170 160 T 220 120 T 280 100 Q 310 90 320 60"
             stroke="url(#rt)" strokeWidth="3.5" fill="none" />
         )}
-        <circle cx="100" cy="210" r="5" fill="#ff2bd6" />
-        <circle cx="100" cy="210" r="10" fill="none" stroke="#ff2bd6" strokeOpacity="0.4" strokeWidth="2" />
-        <circle cx="320" cy="60" r="5" fill="#b6ff3c" />
-        <circle cx="320" cy="60" r="10" fill="none" stroke="#b6ff3c" strokeOpacity="0.4" strokeWidth="2" />
+        <circle cx="100" cy="210" r="5" fill="#f97316" />
+        <circle cx="100" cy="210" r="10" fill="none" stroke="#f97316" strokeOpacity="0.4" strokeWidth="2" />
+        <circle cx="320" cy="60" r="5" fill="#fbbf24" />
+        <circle cx="320" cy="60" r="10" fill="none" stroke="#fbbf24" strokeOpacity="0.4" strokeWidth="2" />
       </svg>
       {car && (
         <motion.div

@@ -78,7 +78,7 @@ export default function Hero() {
               <div className="mt-1 font-display text-xl font-bold">¿A dónde vamos?</div>
               <div className="mt-4 glass rounded-xl p-3 text-sm">📍 Av. Chapultepec 123</div>
               <div className="mt-2 glass rounded-xl p-3 text-sm">🎯 Plaza del Sol</div>
-              <div className="mt-4 rounded-2xl overflow-hidden border border-white/10 h-[260px] relative bg-[#0b1220]">
+              <div className="mt-4 rounded-2xl overflow-hidden border border-white/10 h-[260px] relative bg-[#1a0a00]">
                 <div className="absolute inset-0 grid-bg opacity-60" />
                 <motion.div
                   className="absolute h-3 w-3 rounded-full bg-neon-cyan glow"
