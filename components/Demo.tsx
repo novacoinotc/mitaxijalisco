@@ -196,27 +196,27 @@ export default function Demo() {
 function GdlMap({ progress = 0, showRoute = true, showSosRing = false, deviation = false }: { progress?: number; showRoute?: boolean; showSosRing?: boolean; deviation?: boolean }) {
   // Coordenadas aproximadas estilizadas: Av. Chapultepec (origen) → Plaza del Sol (destino)
   return (
-    <div className="rounded-2xl overflow-hidden border border-white/10 h-[260px] relative bg-gradient-to-br from-[#1a0a00] to-[#0a0500]">
+    <div className="rounded-2xl overflow-hidden border border-white/10 h-[260px] relative bg-gradient-to-br from-[#0a0a0a] to-[#050505]">
       {/* Water / parks */}
       <svg className="absolute inset-0 w-full h-full" viewBox="0 0 360 260" preserveAspectRatio="none">
         <defs>
           <linearGradient id="rt" x1="0" y1="0" x2="1" y2="1">
-            <stop stopColor="#ea6a1a" />
-            <stop offset="1" stopColor="#7c2d12" />
+            <stop stopColor="#10b981" />
+            <stop offset="1" stopColor="#065f46" />
           </linearGradient>
           <pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse">
-            <path d="M 28 0 L 0 0 0 28" fill="none" stroke="rgba(234,106,26,0.08)" strokeWidth="1"/>
+            <path d="M 28 0 L 0 0 0 28" fill="none" stroke="rgba(16,185,129,0.08)" strokeWidth="1"/>
           </pattern>
         </defs>
         <rect width="360" height="260" fill="url(#grid)" />
 
         {/* Parque Metropolitano */}
-        <ellipse cx="80" cy="70" rx="40" ry="22" fill="rgba(251,191,36,0.08)" stroke="rgba(251,191,36,0.2)" />
-        <text x="80" y="74" textAnchor="middle" fontSize="7" fill="rgba(251,191,36,0.7)">P. Metropolitano</text>
+        <ellipse cx="80" cy="70" rx="40" ry="22" fill="rgba(34,197,94,0.08)" stroke="rgba(34,197,94,0.2)" />
+        <text x="80" y="74" textAnchor="middle" fontSize="7" fill="rgba(34,197,94,0.7)">P. Metropolitano</text>
 
         {/* Bosque Los Colomos */}
-        <ellipse cx="280" cy="55" rx="35" ry="18" fill="rgba(251,191,36,0.08)" stroke="rgba(251,191,36,0.2)" />
-        <text x="280" y="58" textAnchor="middle" fontSize="7" fill="rgba(251,191,36,0.7)">Los Colomos</text>
+        <ellipse cx="280" cy="55" rx="35" ry="18" fill="rgba(34,197,94,0.08)" stroke="rgba(34,197,94,0.2)" />
+        <text x="280" y="58" textAnchor="middle" fontSize="7" fill="rgba(34,197,94,0.7)">Los Colomos</text>
 
         {/* Main avenues */}
         <line x1="0" y1="180" x2="360" y2="160" stroke="rgba(255,255,255,0.18)" strokeWidth="3" />
@@ -235,7 +235,7 @@ function GdlMap({ progress = 0, showRoute = true, showSosRing = false, deviation
         {showRoute && (
           <path
             d="M 100 210 Q 140 190 170 160 T 220 120 T 280 100 Q 310 90 320 60"
-            stroke={deviation ? "#f97316" : "url(#rt)"}
+            stroke={deviation ? "#34d399" : "url(#rt)"}
             strokeWidth="3.5"
             fill="none"
             strokeDasharray={deviation ? "6 4" : "none"}
@@ -243,14 +243,14 @@ function GdlMap({ progress = 0, showRoute = true, showSosRing = false, deviation
         )}
 
         {/* Origin marker */}
-        <circle cx="100" cy="210" r="5" fill="#f97316" />
-        <circle cx="100" cy="210" r="10" fill="none" stroke="#f97316" strokeOpacity="0.4" strokeWidth="2" />
-        <text x="108" y="225" fontSize="8" fill="#f97316" fontWeight="bold">Av. Chapultepec 123</text>
+        <circle cx="100" cy="210" r="5" fill="#34d399" />
+        <circle cx="100" cy="210" r="10" fill="none" stroke="#34d399" strokeOpacity="0.4" strokeWidth="2" />
+        <text x="108" y="225" fontSize="8" fill="#34d399" fontWeight="bold">Av. Chapultepec 123</text>
 
         {/* Destination marker */}
-        <circle cx="320" cy="60" r="5" fill="#fbbf24" />
-        <circle cx="320" cy="60" r="10" fill="none" stroke="#fbbf24" strokeOpacity="0.4" strokeWidth="2" />
-        <text x="270" y="48" fontSize="8" fill="#fbbf24" fontWeight="bold">Plaza del Sol</text>
+        <circle cx="320" cy="60" r="5" fill="#22c55e" />
+        <circle cx="320" cy="60" r="10" fill="none" stroke="#22c55e" strokeOpacity="0.4" strokeWidth="2" />
+        <text x="270" y="48" fontSize="8" fill="#22c55e" fontWeight="bold">Plaza del Sol</text>
       </svg>
 
       {/* Car moving along route (simulated positions) */}

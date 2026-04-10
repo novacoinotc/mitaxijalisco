@@ -4,26 +4,21 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Paleta oficial Mi Taxi Jalisco — naranja cálido + negro
         jalisco: {
-          50: "#fff7ed",
-          100: "#ffedd5",
-          200: "#fed7aa",
-          400: "#fb923c",
-          500: "#ea6a1a",   // naranja principal Jalisco
-          600: "#c2410c",
-          700: "#9a3412",
-          800: "#7c2d12",
-          900: "#1a0a00",   // casi negro cálido
-          950: "#0a0500",
+          50: "#f0fdf4",
+          100: "#dcfce7",
+          400: "#34d399",
+          500: "#10b981",
+          600: "#059669",
+          700: "#047857",
+          900: "#022c22",
+          950: "#020a06",
         },
-        // Tokens "neon" remapeados a la nueva paleta para mantener compatibilidad
-        // con el resto del código sin tocar componentes.
         neon: {
-          pink: "#f97316",    // naranja brillante
-          cyan: "#ea6a1a",    // naranja principal
-          lime: "#fbbf24",    // ámbar dorado (éxito)
-          violet: "#7c2d12",  // marrón-naranja profundo
+          pink: "#34d399",
+          cyan: "#10b981",
+          lime: "#22c55e",
+          violet: "#065f46",
         },
       },
       fontFamily: {
