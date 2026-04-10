@@ -10,42 +10,24 @@
 html, body { background: var(--background); color: var(--foreground); }
 body {
   font-family: var(--font-sans), system-ui, sans-serif;
-  background:
-    radial-gradient(900px 450px at 20% -5%, rgba(16,185,129,0.12), transparent 60%),
-    radial-gradient(600px 300px at 80% 100%, rgba(16,185,129,0.08), transparent 60%),
-    #000000;
   min-height: 100vh;
   overflow-x: hidden;
 }
 
 @layer utilities {
   .text-gradient {
-    background: linear-gradient(90deg, #34d399, #10b981, #22c55e);
-    background-size: 200% 200%;
+    background: linear-gradient(90deg, #34d399, #10b981);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    animation: gradient-x 6s ease infinite;
   }
   .glass {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
     backdrop-filter: blur(12px);
   }
   .glow {
-    box-shadow: 0 0 30px rgba(16,185,129,0.25), 0 0 80px rgba(16,185,129,0.1);
-  }
-  .grid-bg {
-    background-image:
-      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
-    background-size: 40px 40px;
-    mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
-  }
-  .noise::before {
-    content: "";
-    position: absolute; inset: 0; pointer-events: none; opacity: 0.03;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence baseFrequency='0.9'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    box-shadow: 0 0 20px rgba(16,185,129,0.15);
   }
 }
 
@@ -54,6 +36,6 @@ body {
 .scrollbar-hide::-webkit-scrollbar { display: none; }
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: #000; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }

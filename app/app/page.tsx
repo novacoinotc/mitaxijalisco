@@ -54,7 +54,7 @@ const initialTrip: TripState = {
 
 export default function FullApp() {
   const [trip, setTrip] = useState<TripState>(initialTrip);
-  const [view, setView] = useState<"both" | "passenger" | "driver">("both");
+  const [view, setView] = useState<"both" | "passenger" | "driver">(typeof window !== "undefined" && window.innerWidth < 768 ? "passenger" : "both");
 
   // car progress animation while onroute
   useEffect(() => {
@@ -92,11 +92,11 @@ export default function FullApp() {
             <span className="font-display font-bold">Mi Taxi <span className="text-gradient">Jalisco</span></span>
             <span className="ml-2 text-[10px] uppercase tracking-wider glass rounded-full px-2 py-0.5 text-white/60">App en vivo</span>
           </Link>
-          <div className="flex items-center gap-2">
-            <div className="glass rounded-full p-1 flex text-xs">
-              <button onClick={() => setView("both")} className={`px-3 py-1.5 rounded-full ${view === "both" ? "bg-gradient-to-r from-neon-cyan to-neon-violet text-black font-semibold" : "text-white/60"}`}>Ambas</button>
-              <button onClick={() => setView("passenger")} className={`px-3 py-1.5 rounded-full ${view === "passenger" ? "bg-gradient-to-r from-neon-cyan to-neon-violet text-black font-semibold" : "text-white/60"}`}>Pasajero</button>
-              <button onClick={() => setView("driver")} className={`px-3 py-1.5 rounded-full ${view === "driver" ? "bg-gradient-to-r from-neon-lime to-neon-cyan text-black font-semibold" : "text-white/60"}`}>Conductor</button>
+          <div className="flex items-center gap-1 sm:gap-2">
+            <div className="glass rounded-full p-0.5 sm:p-1 flex text-[10px] sm:text-xs">
+              <button onClick={() => setView("both")} className={`px-2 sm:px-3 py-1.5 rounded-full hidden sm:block ${view === "both" ? "bg-neon-cyan text-black font-semibold" : "text-white/60"}`}>Ambas</button>
+              <button onClick={() => setView("passenger")} className={`px-2 sm:px-3 py-1.5 rounded-full ${view === "passenger" ? "bg-neon-cyan text-black font-semibold" : "text-white/60"}`}>Pasajero</button>
+              <button onClick={() => setView("driver")} className={`px-2 sm:px-3 py-1.5 rounded-full ${view === "driver" ? "bg-neon-lime text-black font-semibold" : "text-white/60"}`}>Conductor</button>
             </div>
             <button onClick={() => setTrip(initialTrip)} className="glass rounded-full px-3 py-1.5 text-xs hover:bg-white/10">Reset</button>
           </div>
@@ -144,8 +144,8 @@ export default function FullApp() {
 
 function PhoneFrame({ children, nav }: { children: React.ReactNode; nav?: React.ReactNode }) {
   return (
-    <div className="glass rounded-[44px] p-3 glow mx-auto w-full max-w-[380px]">
-      <div className="rounded-[36px] bg-gradient-to-b from-jalisco-900 to-black h-[720px] flex flex-col">
+    <div className="glass rounded-[32px] sm:rounded-[44px] p-2 sm:p-3 mx-auto w-full max-w-[380px]">
+      <div className="rounded-[26px] sm:rounded-[36px] bg-gradient-to-b from-jalisco-900 to-black h-[600px] sm:h-[720px] flex flex-col">
         <div className="h-6 flex items-center justify-center shrink-0"><div className="h-1 w-14 rounded-full bg-white/20" /></div>
         <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide">{children}</div>
         {nav && <div className="shrink-0 border-t border-white/10 bg-black/80 backdrop-blur">{nav}</div>}

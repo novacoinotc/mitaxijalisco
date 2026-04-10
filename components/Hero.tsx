@@ -44,14 +44,14 @@ export default function Hero() {
             </div>
           </motion.div>
 
-          {/* Live animated map preview */}
+          {/* Live map preview */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.3, duration: 0.7 }}
             className="hidden lg:block"
           >
-            <div className="glass rounded-2xl p-2 glow">
+            <div className="glass rounded-2xl p-1.5">
               <AnimatedMapLoop />
             </div>
           </motion.div>
@@ -66,8 +66,8 @@ function AnimatedMapLoop() {
 
   useEffect(() => {
     const id = setInterval(() => {
-      setProgress((p: number) => (p >= 1 ? 0 : p + 0.005));
-    }, 80);
+      setProgress((p) => (p >= 1 ? 0 : p + 0.004));
+    }, 100);
     return () => clearInterval(id);
   }, []);
 
