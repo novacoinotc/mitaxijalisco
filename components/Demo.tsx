@@ -148,27 +148,10 @@ export default function Demo() {
 
 /* ==================== PHONE SCREENS ==================== */
 
+import AnimatedMap from "./AnimatedMap";
+
 function MiniMap({ progress = 0 }: { progress?: number }) {
-  return (
-    <div className="rounded-xl overflow-hidden border border-white/10 h-[180px] relative bg-[#0a0a0a]">
-      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 300 180" preserveAspectRatio="none">
-        <defs>
-          <linearGradient id="drt" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#10b981" /><stop offset="1" stopColor="#065f46" /></linearGradient>
-          <pattern id="dg" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M 24 0 L 0 0 0 24" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="1" /></pattern>
-        </defs>
-        <rect width="300" height="180" fill="url(#dg)" />
-        <line x1="0" y1="130" x2="300" y2="120" stroke="rgba(255,255,255,0.12)" strokeWidth="2" />
-        <line x1="70" y1="0" x2="80" y2="180" stroke="rgba(255,255,255,0.1)" strokeWidth="2" />
-        <path d="M 60 150 Q 120 130 150 100 T 250 30" stroke="url(#drt)" strokeWidth="3" fill="none" />
-        <circle cx="60" cy="150" r="4" fill="#10b981" /><circle cx="250" cy="30" r="4" fill="#22c55e" />
-      </svg>
-      <motion.div className="absolute" animate={{ left: `${18 + progress * 65}%`, top: `${82 - progress * 65}%` }} transition={{ duration: 1 }}>
-        <div className="h-5 w-5 rounded-full bg-neon-cyan glow flex items-center justify-center -translate-x-1/2 -translate-y-1/2">
-          <Car className="h-2.5 w-2.5 text-black" />
-        </div>
-      </motion.div>
-    </div>
-  );
+  return <AnimatedMap progress={progress} className="h-[200px]" />;
 }
 
 function PhoneScreen({ step }: { step: number }) {

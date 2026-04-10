@@ -7,19 +7,30 @@ import Services from "@/components/Services";
 import Demo from "@/components/Demo";
 import Register from "@/components/Register";
 import Footer from "@/components/Footer";
+import { FloatingOrbs, AnimatedGrid, GlowDivider } from "@/components/VisualEffects";
 
 export default function Home() {
   return (
     <main className="relative">
-      <Navbar />
-      <Hero />
-      <Features />
-      <Compare />
-      <Security />
-      <Services />
-      <Demo />
-      <Register />
-      <Footer />
+      <FloatingOrbs />
+      <AnimatedGrid />
+      <div className="relative z-10">
+        <Navbar />
+        <Hero />
+        <GlowDivider />
+        <Features />
+        <GlowDivider />
+        <Compare />
+        <GlowDivider />
+        <Security />
+        <GlowDivider />
+        <Services />
+        <GlowDivider />
+        <Demo />
+        <GlowDivider />
+        <Register />
+        <Footer />
+      </div>
     </main>
   );
 }

@@ -155,55 +155,10 @@ function PhoneFrame({ children, nav }: { children: React.ReactNode; nav?: React.
 }
 
 /* =========================  MAP  ========================= */
+import AnimatedMap from "@/components/AnimatedMap";
 
 function GdlMap({ progress = 0, showRoute = true, sosRing = false, car = true }: { progress?: number; showRoute?: boolean; sosRing?: boolean; car?: boolean }) {
-  return (
-    <div className="rounded-2xl overflow-hidden border border-white/10 h-[200px] relative bg-gradient-to-br from-[#0a0a0a] to-[#050505]">
-      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 360 260" preserveAspectRatio="none">
-        <defs>
-          <linearGradient id="rt" x1="0" y1="0" x2="1" y2="1">
-            <stop stopColor="#10b981" />
-            <stop offset="1" stopColor="#065f46" />
-          </linearGradient>
-          <pattern id="grid2" width="28" height="28" patternUnits="userSpaceOnUse">
-            <path d="M 28 0 L 0 0 0 28" fill="none" stroke="rgba(16,185,129,0.08)" strokeWidth="1" />
-          </pattern>
-        </defs>
-        <rect width="360" height="260" fill="url(#grid2)" />
-        <ellipse cx="80" cy="70" rx="40" ry="22" fill="rgba(34,197,94,0.08)" stroke="rgba(34,197,94,0.2)" />
-        <text x="80" y="74" textAnchor="middle" fontSize="7" fill="rgba(34,197,94,0.7)">P. Metropolitano</text>
-        <ellipse cx="280" cy="55" rx="35" ry="18" fill="rgba(34,197,94,0.08)" stroke="rgba(34,197,94,0.2)" />
-        <line x1="0" y1="180" x2="360" y2="160" stroke="rgba(255,255,255,0.18)" strokeWidth="3" />
-        <line x1="0" y1="130" x2="360" y2="120" stroke="rgba(255,255,255,0.15)" strokeWidth="2.5" />
-        <line x1="90" y1="0" x2="110" y2="260" stroke="rgba(255,255,255,0.15)" strokeWidth="2.5" />
-        <line x1="230" y1="0" x2="250" y2="260" stroke="rgba(255,255,255,0.15)" strokeWidth="2.5" />
-        {showRoute && (
-          <path d="M 100 210 Q 140 190 170 160 T 220 120 T 280 100 Q 310 90 320 60"
-            stroke="url(#rt)" strokeWidth="3.5" fill="none" />
-        )}
-        <circle cx="100" cy="210" r="5" fill="#34d399" />
-        <circle cx="100" cy="210" r="10" fill="none" stroke="#34d399" strokeOpacity="0.4" strokeWidth="2" />
-        <circle cx="320" cy="60" r="5" fill="#22c55e" />
-        <circle cx="320" cy="60" r="10" fill="none" stroke="#22c55e" strokeOpacity="0.4" strokeWidth="2" />
-      </svg>
-      {car && (
-        <motion.div
-          className="absolute"
-          animate={{ left: `${27 + progress * 61}%`, top: `${80 - progress * 60}%` }}
-          transition={{ duration: 0.6, ease: "linear" }}
-        >
-          <div className="relative -translate-x-1/2 -translate-y-1/2">
-            {sosRing && (
-              <motion.div className="absolute inset-0 rounded-full bg-red-500/50" animate={{ scale: [1, 3, 1], opacity: [0.6, 0, 0.6] }} transition={{ repeat: Infinity, duration: 1.2 }} />
-            )}
-            <div className="h-6 w-6 rounded-full bg-neon-cyan glow flex items-center justify-center ring-2 ring-white/40">
-              <Car className="h-3 w-3 text-black" />
-            </div>
-          </div>
-        </motion.div>
-      )}
-    </div>
-  );
+  return <AnimatedMap progress={progress} showRoute={showRoute} sosActive={sosRing} showCar={car} className="h-[200px]" />;
 }
 
 /* =========================  PASSENGER APP  ========================= */
