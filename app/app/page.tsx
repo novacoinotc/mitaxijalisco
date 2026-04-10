@@ -142,12 +142,13 @@ export default function FullApp() {
 
 /* =========================  PHONE FRAME  ========================= */
 
-function PhoneFrame({ children }: { children: React.ReactNode }) {
+function PhoneFrame({ children, nav }: { children: React.ReactNode; nav?: React.ReactNode }) {
   return (
     <div className="glass rounded-[44px] p-3 glow mx-auto w-full max-w-[380px]">
-      <div className="rounded-[36px] bg-gradient-to-b from-jalisco-900 to-black h-[720px] relative flex flex-col">
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 h-1 w-14 rounded-full bg-white/20 z-10" />
-        <div className="pt-6 flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide">{children}</div>
+      <div className="rounded-[36px] bg-gradient-to-b from-jalisco-900 to-black h-[720px] flex flex-col">
+        <div className="h-6 flex items-center justify-center shrink-0"><div className="h-1 w-14 rounded-full bg-white/20" /></div>
+        <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide">{children}</div>
+        {nav && <div className="shrink-0 border-t border-white/10 bg-black/80 backdrop-blur">{nav}</div>}
       </div>
     </div>
   );
@@ -211,18 +212,20 @@ function PassengerApp({ trip, setTrip }: { trip: TripState; setTrip: (u: TripSta
   const [tab, setTab] = useState<"home" | "history" | "profile">("home");
   const [sosOpen, setSosOpen] = useState(false);
 
+  const bottomNav = (
+    <div className="flex items-center justify-around py-3">
+      <button onClick={() => setTab("home")} className={`flex flex-col items-center gap-0.5 ${tab === "home" ? "text-neon-cyan" : "text-white/50"}`}><Home className="h-4 w-4" /><span className="text-[10px]">Inicio</span></button>
+      <button onClick={() => setTab("history")} className={`flex flex-col items-center gap-0.5 ${tab === "history" ? "text-neon-cyan" : "text-white/50"}`}><History className="h-4 w-4" /><span className="text-[10px]">Historial</span></button>
+      <button onClick={() => setTab("profile")} className={`flex flex-col items-center gap-0.5 ${tab === "profile" ? "text-neon-cyan" : "text-white/50"}`}><User className="h-4 w-4" /><span className="text-[10px]">Perfil</span></button>
+    </div>
+  );
+
   return (
-    <PhoneFrame>
-      <div className="h-full flex flex-col px-5">
+    <PhoneFrame nav={bottomNav}>
+      <div className="flex flex-col px-5 pb-4">
         {tab === "home" && <PassengerHome trip={trip} setTrip={setTrip} openSos={() => setSosOpen(true)} />}
         {tab === "history" && <PassengerHistory />}
         {tab === "profile" && <PassengerProfile />}
-      </div>
-      {/* Bottom nav */}
-      <div className="absolute bottom-0 inset-x-0 border-t border-white/10 bg-black/60 backdrop-blur flex items-center justify-around py-3">
-        <button onClick={() => setTab("home")} className={`flex flex-col items-center gap-0.5 ${tab === "home" ? "text-neon-cyan" : "text-white/50"}`}><Home className="h-4 w-4" /><span className="text-[10px]">Inicio</span></button>
-        <button onClick={() => setTab("history")} className={`flex flex-col items-center gap-0.5 ${tab === "history" ? "text-neon-cyan" : "text-white/50"}`}><History className="h-4 w-4" /><span className="text-[10px]">Historial</span></button>
-        <button onClick={() => setTab("profile")} className={`flex flex-col items-center gap-0.5 ${tab === "profile" ? "text-neon-cyan" : "text-white/50"}`}><User className="h-4 w-4" /><span className="text-[10px]">Perfil</span></button>
       </div>
 
       <AnimatePresence>
@@ -245,7 +248,7 @@ function PassengerHome({ trip, setTrip, openSos }: { trip: TripState; setTrip: (
 
   if (trip.status === "idle" || trip.status === "selecting") {
     return (
-      <div className="h-full flex flex-col pb-20">
+      <div className="h-full flex flex-col pb-4">
         <div className="flex items-center justify-between">
           <div>
             <div className="text-xs text-white/60">Buenas tardes</div>
@@ -295,7 +298,7 @@ function PassengerHome({ trip, setTrip, openSos }: { trip: TripState; setTrip: (
 
   if (trip.status === "requesting" || trip.status === "searching") {
     return (
-      <div className="h-full flex flex-col items-center justify-center text-center pb-20">
+      <div className="h-full flex flex-col items-center justify-center text-center pb-4">
         <motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ repeat: Infinity, duration: 2 }} className="h-24 w-24 rounded-full bg-gradient-to-br from-neon-cyan to-neon-violet glow flex items-center justify-center">
           <Radar className="h-10 w-10 text-black" />
         </motion.div>
@@ -313,7 +316,7 @@ function PassengerHome({ trip, setTrip, openSos }: { trip: TripState; setTrip: (
 
   if (trip.status === "matched" || trip.status === "arriving") {
     return (
-      <div className="h-full flex flex-col pb-20">
+      <div className="h-full flex flex-col pb-4">
         <div className="text-[10px] text-neon-cyan font-semibold">CONDUCTOR ASIGNADO</div>
         <div className="mt-1 glass rounded-xl p-3 flex items-center gap-3">
           <div className="h-12 w-12 rounded-full bg-gradient-to-br from-neon-lime to-neon-cyan ring-2 ring-neon-lime/40" />
@@ -354,7 +357,7 @@ function PassengerHome({ trip, setTrip, openSos }: { trip: TripState; setTrip: (
 
   if (trip.status === "pickedup" || trip.status === "onroute") {
     return (
-      <div className="h-full flex flex-col pb-20">
+      <div className="h-full flex flex-col pb-4">
         <div className="flex items-center justify-between">
           <div>
             <div className="text-[10px] text-white/60">En camino a</div>
@@ -389,7 +392,7 @@ function PassengerHome({ trip, setTrip, openSos }: { trip: TripState; setTrip: (
 
   if (trip.status === "arrived") {
     return (
-      <div className="h-full flex flex-col pb-20">
+      <div className="h-full flex flex-col pb-4">
         <div className="flex-1 flex flex-col items-center justify-center text-center">
           <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="h-20 w-20 rounded-full bg-neon-lime/15 border-2 border-neon-lime/40 flex items-center justify-center">
             <CheckCircle2 className="h-10 w-10 text-neon-lime" />
@@ -411,7 +414,7 @@ function PassengerHome({ trip, setTrip, openSos }: { trip: TripState; setTrip: (
 
   if (trip.status === "paid") {
     return (
-      <div className="h-full flex flex-col pb-20">
+      <div className="h-full flex flex-col pb-4">
         <div className="text-xs text-white/60">Califica tu viaje</div>
         <div className="flex items-center gap-3 mt-2">
           <div className="h-12 w-12 rounded-full bg-gradient-to-br from-neon-lime to-neon-cyan" />
@@ -455,7 +458,7 @@ function PassengerHome({ trip, setTrip, openSos }: { trip: TripState; setTrip: (
 
   // rated
   return (
-    <div className="h-full flex flex-col items-center justify-center text-center pb-20">
+    <div className="h-full flex flex-col items-center justify-center text-center pb-4">
       <CheckCircle2 className="h-20 w-20 text-neon-lime" />
       <div className="mt-3 font-display text-xl font-bold">¡Gracias Sofía!</div>
       <div className="text-xs text-white/60">Viaje completado</div>
@@ -529,7 +532,7 @@ function PassengerHistory() {
     { to: "Farmacia Gdl", from: "Casa", fare: 45, date: "02 abr 22:10", rating: 5 },
   ];
   return (
-    <div className="h-full flex flex-col pb-20">
+    <div className="h-full flex flex-col pb-4">
       <div className="font-display text-lg font-bold">Tu historial</div>
       <div className="text-[10px] text-white/60">28 viajes · $4,820 gastado · $1,108 ahorrado vs la competencia</div>
       <div className="mt-3 space-y-2 overflow-y-auto flex-1">
@@ -554,7 +557,7 @@ function PassengerHistory() {
 
 function PassengerProfile() {
   return (
-    <div className="h-full flex flex-col pb-20">
+    <div className="h-full flex flex-col pb-4">
       <div className="flex items-center gap-3">
         <div className="h-14 w-14 rounded-full bg-gradient-to-br from-neon-pink to-neon-violet" />
         <div>
@@ -616,17 +619,20 @@ function DriverApp({ trip, setTrip }: { trip: TripState; setTrip: (u: TripState 
   const [online, setOnline] = useState(true);
   const [tab, setTab] = useState<"home" | "earnings" | "profile">("home");
 
+  const bottomNav = (
+    <div className="flex items-center justify-around py-3">
+      <button onClick={() => setTab("home")} className={`flex flex-col items-center gap-0.5 ${tab === "home" ? "text-neon-lime" : "text-white/50"}`}><Home className="h-4 w-4" /><span className="text-[10px]">Inicio</span></button>
+      <button onClick={() => setTab("earnings")} className={`flex flex-col items-center gap-0.5 ${tab === "earnings" ? "text-neon-lime" : "text-white/50"}`}><Wallet className="h-4 w-4" /><span className="text-[10px]">Ganancias</span></button>
+      <button onClick={() => setTab("profile")} className={`flex flex-col items-center gap-0.5 ${tab === "profile" ? "text-neon-lime" : "text-white/50"}`}><User className="h-4 w-4" /><span className="text-[10px]">Perfil</span></button>
+    </div>
+  );
+
   return (
-    <PhoneFrame>
-      <div className="h-full flex flex-col px-5">
+    <PhoneFrame nav={bottomNav}>
+      <div className="flex flex-col px-5 pb-4">
         {tab === "home" && <DriverHome trip={trip} setTrip={setTrip} online={online} setOnline={setOnline} />}
         {tab === "earnings" && <DriverEarnings />}
         {tab === "profile" && <DriverProfile />}
-      </div>
-      <div className="absolute bottom-0 inset-x-0 border-t border-white/10 bg-black/60 backdrop-blur flex items-center justify-around py-3">
-        <button onClick={() => setTab("home")} className={`flex flex-col items-center gap-0.5 ${tab === "home" ? "text-neon-lime" : "text-white/50"}`}><Home className="h-4 w-4" /><span className="text-[10px]">Inicio</span></button>
-        <button onClick={() => setTab("earnings")} className={`flex flex-col items-center gap-0.5 ${tab === "earnings" ? "text-neon-lime" : "text-white/50"}`}><Wallet className="h-4 w-4" /><span className="text-[10px]">Ganancias</span></button>
-        <button onClick={() => setTab("profile")} className={`flex flex-col items-center gap-0.5 ${tab === "profile" ? "text-neon-lime" : "text-white/50"}`}><User className="h-4 w-4" /><span className="text-[10px]">Perfil</span></button>
       </div>
     </PhoneFrame>
   );
@@ -638,7 +644,7 @@ function DriverHome({ trip, setTrip, online, setOnline }: { trip: TripState; set
 
   if (trip.status === "idle" || trip.status === "selecting" || trip.status === "requesting") {
     return (
-      <div className="h-full flex flex-col pb-20">
+      <div className="h-full flex flex-col pb-4">
         <div className="flex items-center justify-between">
           <div>
             <div className="text-xs text-white/60">Don Roberto</div>
@@ -666,7 +672,7 @@ function DriverHome({ trip, setTrip, online, setOnline }: { trip: TripState; set
 
   if (hasRequest) {
     return (
-      <div className="h-full flex flex-col pb-20">
+      <div className="h-full flex flex-col pb-4">
         <div className="text-xs text-white/60">En línea 🟢</div>
         <div className="mt-2"><GdlMap progress={0.1} /></div>
         <motion.div
@@ -718,7 +724,7 @@ function DriverHome({ trip, setTrip, online, setOnline }: { trip: TripState; set
 
   if (trip.status === "matched" || trip.status === "arriving") {
     return (
-      <div className="h-full flex flex-col pb-20">
+      <div className="h-full flex flex-col pb-4">
         <div className="text-[10px] text-white/60">Recoger a</div>
         <div className="font-display text-base font-bold">Sofía R. ⭐ 4.9</div>
         <div className="mt-2"><GdlMap progress={trip.carProgress} /></div>
@@ -755,7 +761,7 @@ function DriverHome({ trip, setTrip, online, setOnline }: { trip: TripState; set
 
   if (trip.status === "pickedup" || trip.status === "onroute") {
     return (
-      <div className="h-full flex flex-col pb-20">
+      <div className="h-full flex flex-col pb-4">
         <div className="flex items-center justify-between">
           <div>
             <div className="text-[10px] text-white/60">Llevando a Sofía a</div>
@@ -790,7 +796,7 @@ function DriverHome({ trip, setTrip, online, setOnline }: { trip: TripState; set
 
   if (trip.status === "arrived" || trip.status === "paid" || trip.status === "rated") {
     return (
-      <div className="h-full flex flex-col pb-20 items-center justify-center text-center">
+      <div className="h-full flex flex-col pb-4 items-center justify-center text-center">
         <CheckCircle2 className="h-16 w-16 text-neon-lime" />
         <div className="mt-3 font-display text-lg font-bold">¡Viaje completado!</div>
         <div className="mt-4 w-full glass rounded-xl p-4">
@@ -815,7 +821,7 @@ function DriverHome({ trip, setTrip, online, setOnline }: { trip: TripState; set
 
 function DriverEarnings() {
   return (
-    <div className="h-full flex flex-col pb-20">
+    <div className="h-full flex flex-col pb-4">
       <div className="font-display text-lg font-bold">Ganancias</div>
       <div className="text-[10px] text-white/60">Pago automático diario a BBVA</div>
       <div className="mt-3 glass rounded-2xl p-4 bg-gradient-to-br from-neon-lime/10 to-transparent border-neon-lime/30">
@@ -840,7 +846,7 @@ function DriverEarnings() {
 
 function DriverProfile() {
   return (
-    <div className="h-full flex flex-col pb-20">
+    <div className="h-full flex flex-col pb-4">
       <div className="flex items-center gap-3">
         <div className="h-14 w-14 rounded-full bg-gradient-to-br from-neon-lime to-neon-cyan" />
         <div>
