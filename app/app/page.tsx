@@ -144,8 +144,8 @@ export default function FullApp() {
 
 function PhoneFrame({ children, nav }: { children: React.ReactNode; nav?: React.ReactNode }) {
   return (
-    <div className="glass rounded-[32px] sm:rounded-[44px] p-2 sm:p-3 mx-auto w-full max-w-[380px]">
-      <div className="rounded-[26px] sm:rounded-[36px] bg-gradient-to-b from-jalisco-900 to-black h-[600px] sm:h-[720px] flex flex-col">
+    <div className="glass rounded-[32px] sm:rounded-[44px] p-2 sm:p-3 mx-auto w-[calc(100%-16px)] sm:w-full max-w-[380px]">
+      <div className="rounded-[26px] sm:rounded-[36px] bg-gradient-to-b from-jalisco-900 to-black h-[min(calc(100vh-160px),640px)] sm:h-[720px] flex flex-col">
         <div className="h-6 flex items-center justify-center shrink-0"><div className="h-1 w-14 rounded-full bg-white/20" /></div>
         <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide">{children}</div>
         {nav && <div className="shrink-0 border-t border-white/10 bg-black/80 backdrop-blur">{nav}</div>}
@@ -168,7 +168,7 @@ function PassengerApp({ trip, setTrip }: { trip: TripState; setTrip: (u: TripSta
   const [sosOpen, setSosOpen] = useState(false);
 
   const bottomNav = (
-    <div className="flex items-center justify-around py-3">
+    <div className="flex items-center justify-around py-3 px-2">
       <button onClick={() => setTab("home")} className={`flex flex-col items-center gap-0.5 ${tab === "home" ? "text-neon-cyan" : "text-white/50"}`}><Home className="h-4 w-4" /><span className="text-[10px]">Inicio</span></button>
       <button onClick={() => setTab("history")} className={`flex flex-col items-center gap-0.5 ${tab === "history" ? "text-neon-cyan" : "text-white/50"}`}><History className="h-4 w-4" /><span className="text-[10px]">Historial</span></button>
       <button onClick={() => setTab("profile")} className={`flex flex-col items-center gap-0.5 ${tab === "profile" ? "text-neon-cyan" : "text-white/50"}`}><User className="h-4 w-4" /><span className="text-[10px]">Perfil</span></button>
@@ -325,11 +325,11 @@ function PassengerHome({ trip, setTrip, openSos }: { trip: TripState; setTrip: (
         </div>
         <div className="mt-2"><GdlMap progress={Math.max(0.2, trip.carProgress)} sosRing={trip.sosActive} /></div>
         <div className="mt-2 grid grid-cols-3 gap-1.5 text-center">
-          <div className="glass rounded-lg p-1.5"><div className="text-[9px] text-white/50">Distancia</div><div className="text-xs font-bold">{(trip.distance * (1 - trip.carProgress)).toFixed(1)} km</div></div>
-          <div className="glass rounded-lg p-1.5"><div className="text-[9px] text-white/50">Velocidad</div><div className="text-xs font-bold">38 km/h</div></div>
-          <div className="glass rounded-lg p-1.5"><div className="text-[9px] text-white/50">Tarifa</div><div className="text-xs font-bold text-gradient">${trip.fare}</div></div>
+          <div className="glass rounded-lg p-1.5"><div className="text-[11px] text-white/50">Distancia</div><div className="text-xs font-bold">{(trip.distance * (1 - trip.carProgress)).toFixed(1)} km</div></div>
+          <div className="glass rounded-lg p-1.5"><div className="text-[11px] text-white/50">Velocidad</div><div className="text-xs font-bold">38 km/h</div></div>
+          <div className="glass rounded-lg p-1.5"><div className="text-[11px] text-white/50">Tarifa</div><div className="text-xs font-bold text-gradient">${trip.fare}</div></div>
         </div>
-        <div className="mt-2 glass rounded-lg p-2 text-[9px] flex items-center gap-2 bg-neon-lime/5">
+        <div className="mt-2 glass rounded-lg p-2 text-[11px] flex items-center gap-2 bg-neon-lime/5">
           <Radar className="h-3 w-3 text-neon-lime" />
           <span className="text-neon-lime font-semibold">Ruta óptima · IA activa</span>
           <span className="text-white/50 ml-auto">Mamá viendo en vivo 👁️</span>
@@ -575,7 +575,7 @@ function DriverApp({ trip, setTrip }: { trip: TripState; setTrip: (u: TripState 
   const [tab, setTab] = useState<"home" | "earnings" | "profile">("home");
 
   const bottomNav = (
-    <div className="flex items-center justify-around py-3">
+    <div className="flex items-center justify-around py-3 px-2">
       <button onClick={() => setTab("home")} className={`flex flex-col items-center gap-0.5 ${tab === "home" ? "text-neon-lime" : "text-white/50"}`}><Home className="h-4 w-4" /><span className="text-[10px]">Inicio</span></button>
       <button onClick={() => setTab("earnings")} className={`flex flex-col items-center gap-0.5 ${tab === "earnings" ? "text-neon-lime" : "text-white/50"}`}><Wallet className="h-4 w-4" /><span className="text-[10px]">Ganancias</span></button>
       <button onClick={() => setTab("profile")} className={`flex flex-col items-center gap-0.5 ${tab === "profile" ? "text-neon-lime" : "text-white/50"}`}><User className="h-4 w-4" /><span className="text-[10px]">Perfil</span></button>
@@ -729,11 +729,11 @@ function DriverHome({ trip, setTrip, online, setOnline }: { trip: TripState; set
         </div>
         <div className="mt-2"><GdlMap progress={Math.max(0.2, trip.carProgress)} /></div>
         <div className="mt-3 grid grid-cols-3 gap-1.5 text-center">
-          <div className="glass rounded-lg p-1.5"><div className="text-[9px] text-white/50">Distancia</div><div className="text-xs font-bold">{(trip.distance * (1 - trip.carProgress)).toFixed(1)} km</div></div>
-          <div className="glass rounded-lg p-1.5"><div className="text-[9px] text-white/50">Ganas</div><div className="text-xs font-bold text-neon-lime">${Math.round(trip.fare * 0.9)}</div></div>
-          <div className="glass rounded-lg p-1.5"><div className="text-[9px] text-white/50">Com.</div><div className="text-xs font-bold text-white/60">${Math.round(trip.fare * 0.1)}</div></div>
+          <div className="glass rounded-lg p-1.5"><div className="text-[11px] text-white/50">Distancia</div><div className="text-xs font-bold">{(trip.distance * (1 - trip.carProgress)).toFixed(1)} km</div></div>
+          <div className="glass rounded-lg p-1.5"><div className="text-[11px] text-white/50">Ganas</div><div className="text-xs font-bold text-neon-lime">${Math.round(trip.fare * 0.9)}</div></div>
+          <div className="glass rounded-lg p-1.5"><div className="text-[11px] text-white/50">Com.</div><div className="text-xs font-bold text-white/60">${Math.round(trip.fare * 0.1)}</div></div>
         </div>
-        <div className="mt-2 glass rounded-lg p-2 text-[9px] text-center text-white/60">🛡️ Protección activa · Ruta monitoreada por IA</div>
+        <div className="mt-2 glass rounded-lg p-2 text-[11px] text-center text-white/60">🛡️ Protección activa · Ruta monitoreada por IA</div>
         {trip.status === "pickedup" && (
           <button
             onClick={() => setTrip({ ...trip, status: "onroute" })}
@@ -764,7 +764,7 @@ function DriverHome({ trip, setTrip, online, setOnline }: { trip: TripState; set
               <div className="font-bold text-neon-lime">+${trip.tipAmount}</div>
             </div>
           )}
-          <div className="mt-2 text-[9px] text-neon-lime">💰 En la competencia hubieras recibido ${Math.round(trip.fare * 0.7)}</div>
+          <div className="mt-2 text-[11px] text-neon-lime">💰 En la competencia hubieras recibido ${Math.round(trip.fare * 0.7)}</div>
         </div>
         <div className="mt-3 text-[10px] text-white/50">Pago a BBVA •••• 4821 en 24h</div>
       </div>

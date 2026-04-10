@@ -14,20 +14,41 @@ export default function Home() {
     <main className="relative overflow-x-hidden">
       <Navbar />
       <Hero />
+
       <GlowDivider />
       <Features />
+
       <GlowDivider />
-      <Compare />
       <div className="relative">
         <PatternBg />
-        <Security />
+        <Compare />
       </div>
-      <CityIllustration />
-      <Services />
+
       <GlowDivider />
-      <Demo />
+      <Security />
+
+      <CityIllustration />
+
+      <div className="relative">
+        <PatternBg variant="lines" />
+        <Services />
+      </div>
+
+      <GlowDivider />
+      <div className="relative">
+        <Demo />
+        <div className="hidden lg:flex justify-center mt-6 opacity-60">
+          <PhoneIllustration className="w-24" />
+        </div>
+      </div>
+
       <GlowDivider />
       <Register />
+
+      <div className="flex justify-center py-8 opacity-40">
+        <CarIllustration className="w-32" />
+      </div>
+
       <Footer />
     </main>
   );

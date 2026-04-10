@@ -66,8 +66,8 @@ function AnimatedMapLoop() {
 
   useEffect(() => {
     const id = setInterval(() => {
-      setProgress((p) => (p >= 1 ? 0 : p + 0.004));
-    }, 100);
+      setProgress((p) => (p >= 1 ? 0 : p + 0.006));
+    }, 200);
     return () => clearInterval(id);
   }, []);
 
