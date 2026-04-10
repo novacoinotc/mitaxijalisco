@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, ShieldCheck, TrendingUp } from "lucide-react";
 import Link from "next/link";
@@ -44,7 +44,6 @@ export default function Hero() {
             </div>
           </motion.div>
 
-          {/* Live map preview */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -52,7 +51,7 @@ export default function Hero() {
             className="hidden lg:block"
           >
             <div className="glass rounded-2xl p-1.5">
-              <AnimatedMapLoop />
+              <SmoothMapLoop />
             </div>
           </motion.div>
         </div>
@@ -61,14 +60,28 @@ export default function Hero() {
   );
 }
 
-function AnimatedMapLoop() {
+// Smooth loop using rAF — updates progress via ref, not state
+function SmoothMapLoop() {
   const [progress, setProgress] = useState(0);
+  const rafRef = useRef(0);
+  const progressRef = useRef(0);
 
   useEffect(() => {
-    const id = setInterval(() => {
-      setProgress((p) => (p >= 1 ? 0 : p + 0.006));
-    }, 200);
-    return () => clearInterval(id);
+    let lastUpdate = 0;
+    const loop = (time: number) => {
+      if (!lastUpdate) lastUpdate = time;
+      const elapsed = (time - lastUpdate) / 1000;
+      // Update every 300ms — smooth enough, minimal React work
+      if (elapsed > 0.3) {
+        lastUpdate = time;
+        progressRef.current += elapsed * 0.035;
+        if (progressRef.current > 1) progressRef.current = 0;
+        setProgress(progressRef.current);
+      }
+      rafRef.current = requestAnimationFrame(loop);
+    };
+    rafRef.current = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(rafRef.current);
   }, []);
 
   return <AnimatedMap progress={progress} className="h-[320px] rounded-xl" />;
