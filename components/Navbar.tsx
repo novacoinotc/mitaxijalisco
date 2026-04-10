@@ -18,23 +18,16 @@ export default function Navbar() {
               Mi Taxi <span className="text-gradient">Jalisco</span>
             </span>
           </Link>
-          <nav className="hidden md:flex items-center gap-6 text-sm text-white/80">
+          <nav className="hidden md:flex items-center gap-5 text-sm text-white/70">
             <a href="#features" className="hover:text-white">Funciones</a>
-            <a href="#comparativa" className="hover:text-white">vs la competencia</a>
             <a href="#seguridad" className="hover:text-white">Seguridad</a>
-            <a href="#servicios" className="hover:text-white">Servicios</a>
-            <a href="#demo" className="hover:text-white">Demo</a>
             <a href="#registro" className="hover:text-white">Registro</a>
-            <Link href="/app" className="text-neon-cyan hover:text-white font-semibold">🎮 Probar app</Link>
-            <Link href="/usuario" className="hover:text-white">Usuario</Link>
-            <Link href="/conductor" className="hover:text-white">Conductor</Link>
-            <Link href="/admin" className="hover:text-white">Admin</Link>
           </nav>
           <Link
-            href="#registro"
-            className="rounded-xl bg-gradient-to-r from-neon-cyan to-neon-violet px-4 py-2 text-sm font-semibold text-black hover:opacity-90"
+            href="/app"
+            className="rounded-xl bg-neon-cyan px-4 py-2 text-sm font-semibold text-black hover:opacity-90"
           >
-            Unirme
+            Probar app
           </Link>
         </div>
       </div>

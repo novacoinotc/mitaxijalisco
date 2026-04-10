@@ -13,7 +13,7 @@ export default function Hero() {
             <br />
             <span className="text-gradient">Tu Jalisco.</span>
           </h1>
-          <p className="mt-5 text-lg text-white/60 max-w-xl">
+          <p className="mt-5 text-lg text-white/80 max-w-xl">
             Solo 10% de comisión para el conductor. Seguridad conectada al C5. Precios justos para ti. Hecho por jaliscienses.
           </p>
 
@@ -33,7 +33,7 @@ export default function Hero() {
             </Link>
           </div>
 
-          <div className="mt-12 flex flex-wrap gap-6 text-sm text-white/60">
+          <div className="mt-12 flex flex-wrap gap-6 text-sm text-white/80">
             <div className="flex items-center gap-2"><TrendingUp className="h-4 w-4 text-neon-cyan" /> <span><b className="text-white">90%</b> para el conductor</span></div>
             <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-neon-cyan" /> <span>SOS <b className="text-white">24/7</b> con C5</span></div>
           </div>

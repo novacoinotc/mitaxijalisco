@@ -7,9 +7,9 @@ export function Stat({ label, value, hint, color = "cyan" }: { label: string; va
   };
   return (
     <div className={`glass rounded-2xl p-5 bg-gradient-to-br ${colors[color]}`}>
-      <div className="text-xs text-white/60">{label}</div>
+      <div className="text-xs text-white/80">{label}</div>
       <div className="mt-1 font-display text-3xl font-bold text-gradient">{value}</div>
-      {hint && <div className="text-xs text-white/50 mt-0.5">{hint}</div>}
+      {hint && <div className="text-xs text-white/70 mt-0.5">{hint}</div>}
     </div>
   );
 }

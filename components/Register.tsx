@@ -14,15 +14,15 @@ export default function Register() {
           <h2 className="font-display text-3xl md:text-4xl font-bold">
             Únete a <span className="text-gradient">Mi Taxi Jalisco</span>.
           </h2>
-          <p className="mt-3 text-white/60">Los primeros 1,000 conductores: 0% comisión por 3 meses.</p>
+          <p className="mt-3 text-white/80">Los primeros 1,000 conductores: 0% comisión por 3 meses.</p>
         </motion.div>
 
         <div className="mt-6 glass rounded-2xl p-6">
           <div className="flex gap-2 glass rounded-full p-1 mb-6">
-            <button onClick={() => setTab("user")} className={`flex-1 px-4 py-2 rounded-full text-sm font-semibold flex items-center justify-center gap-2 ${tab === "user" ? "bg-neon-cyan text-black" : "text-white/60"}`}>
+            <button onClick={() => setTab("user")} className={`flex-1 px-4 py-2 rounded-full text-sm font-semibold flex items-center justify-center gap-2 ${tab === "user" ? "bg-neon-cyan text-black" : "text-white/80"}`}>
               <User className="h-4 w-4" /> Pasajero
             </button>
-            <button onClick={() => setTab("driver")} className={`flex-1 px-4 py-2 rounded-full text-sm font-semibold flex items-center justify-center gap-2 ${tab === "driver" ? "bg-neon-cyan text-black" : "text-white/60"}`}>
+            <button onClick={() => setTab("driver")} className={`flex-1 px-4 py-2 rounded-full text-sm font-semibold flex items-center justify-center gap-2 ${tab === "driver" ? "bg-neon-cyan text-black" : "text-white/80"}`}>
               <Car className="h-4 w-4" /> Conductor
             </button>
           </div>
@@ -31,7 +31,7 @@ export default function Register() {
             <div className="text-center py-8">
               <CheckCircle2 className="h-14 w-14 text-neon-lime mx-auto" />
               <div className="mt-3 font-display text-xl font-bold">¡Estás dentro!</div>
-              <div className="mt-1 text-white/60 text-sm">Te avisaremos en cuanto lancemos.</div>
+              <div className="mt-1 text-white/80 text-sm">Te avisaremos en cuanto lancemos.</div>
             </div>
           ) : (
             <form onSubmit={(e) => { e.preventDefault(); setSent(true); }} className="space-y-3">

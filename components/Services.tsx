@@ -19,7 +19,7 @@ export default function Services() {
           <h2 className="font-display text-3xl md:text-4xl font-bold">
             Más que <span className="text-gradient">taxi</span>.
           </h2>
-          <p className="mt-3 text-white/60">Todo con la misma red de conductores verificados.</p>
+          <p className="mt-3 text-white/80">Todo con la misma red de conductores verificados.</p>
         </motion.div>
 
         <div className="mt-10 grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -34,7 +34,7 @@ export default function Services() {
             >
               <Icon className="h-5 w-5 text-neon-cyan mb-3" />
               <h3 className="font-semibold">{t}</h3>
-              <p className="mt-1 text-sm text-white/50">{d}</p>
+              <p className="mt-1 text-sm text-white/70">{d}</p>
             </motion.div>
           ))}
         </div>

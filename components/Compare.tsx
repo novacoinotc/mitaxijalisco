@@ -23,9 +23,9 @@ export default function Compare() {
 
         <div className="mt-8 glass rounded-2xl overflow-hidden">
           <div className="grid grid-cols-3 text-sm font-semibold border-b border-white/10">
-            <div className="p-4 text-white/50"></div>
+            <div className="p-4 text-white/70"></div>
             <div className="p-4 text-neon-cyan">Nosotros</div>
-            <div className="p-4 text-white/40">Otros</div>
+            <div className="p-4 text-white/60">Otros</div>
           </div>
           {rows.map(([label, a, b], i) => (
             <div key={label as string} className={`grid grid-cols-3 text-sm border-b border-white/5 ${i % 2 ? "bg-white/[0.02]" : ""}`}>
@@ -33,8 +33,8 @@ export default function Compare() {
               <div className="p-4 font-semibold text-white">
                 {typeof a === "boolean" ? (a ? <Check className="h-5 w-5 text-neon-lime" /> : <X className="h-5 w-5 text-white/30" />) : a}
               </div>
-              <div className="p-4 text-white/50">
-                {typeof b === "boolean" ? (b ? <Check className="h-5 w-5 text-white/40" /> : <X className="h-5 w-5 text-red-400/60" />) : b}
+              <div className="p-4 text-white/70">
+                {typeof b === "boolean" ? (b ? <Check className="h-5 w-5 text-white/60" /> : <X className="h-5 w-5 text-red-400/60" />) : b}
               </div>
             </div>
           ))}

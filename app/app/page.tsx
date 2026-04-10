@@ -473,57 +473,48 @@ function PassengerHome({ trip, setTrip, openSos }: { trip: TripState; setTrip: (
 }
 
 function ServicePicker({ trip, setTrip }: { trip: TripState; setTrip: (u: TripState | ((t: TripState) => TripState)) => void }) {
-  const services: { key: Service; icon: any; name: string; mult: number; d: string }[] = [
-    { key: "ride", icon: Car, name: "Clásico", mult: 1, d: "Hasta 4 pers." },
-    { key: "shared", icon: Users, name: "Compartido", mult: 0.62, d: "Hasta -40%" },
-    { key: "envios", icon: Package, name: "Envíos", mult: 0.85, d: "Paquetería" },
-    { key: "super", icon: ShoppingBasket, name: "Súper", mult: 1.25, d: "Mandados" },
-    { key: "farmacia", icon: Pill, name: "Farmacia", mult: 0.7, d: "Medicinas" },
-    { key: "pet", icon: Dog, name: "Pet", mult: 1.1, d: "Pet friendly" },
-    { key: "aeropuerto", icon: Plane, name: "Aeropuerto", mult: 4.1, d: "Tarifa fija" },
-    { key: "favor", icon: Heart, name: "Favor", mult: 0.9, d: "Recados" },
+  const services: { key: Service; icon: any; name: string; mult: number }[] = [
+    { key: "ride", icon: Car, name: "Clásico", mult: 1 },
+    { key: "shared", icon: Users, name: "Compartido", mult: 0.62 },
+    { key: "envios", icon: Package, name: "Envíos", mult: 0.85 },
+    { key: "super", icon: ShoppingBasket, name: "Súper", mult: 1.25 },
   ];
 
   const base = Math.round(trip.fare);
 
+  const confirmTrip = () => {
+    setTrip({ ...trip, status: "searching" });
+    setTimeout(() => {
+      setTrip((t) => ({
+        ...t,
+        status: "matched",
+        driver: { name: "Don Roberto Mendoza", plate: "JAL-1234", vehicle: "Nissan Tsuru blanco", rating: 4.97, score: 98 },
+      }));
+    }, 2500);
+  };
+
   return (
-    <div className="mt-3 glass rounded-2xl p-3">
-      <div className="text-[10px] text-white/60 mb-2">Elige servicio</div>
-      <div className="grid grid-cols-2 gap-1.5 max-h-[160px] overflow-y-auto pr-1">
-        {services.map((s) => (
-          <button
-            key={s.key}
-            onClick={() => setTrip({ ...trip, service: s.key, fare: Math.round(base * s.mult) })}
-            className={`rounded-lg p-2 text-left flex items-center gap-2 text-xs ${trip.service === s.key ? "bg-gradient-to-r from-neon-cyan/20 to-neon-violet/20 border border-neon-cyan/40" : "bg-white/[0.03] border border-white/5"}`}
-          >
-            <s.icon className="h-3.5 w-3.5 text-neon-cyan" />
-            <div className="flex-1">
-              <div className="font-semibold text-[10px]">{s.name}</div>
-              <div className="text-[9px] text-white/50">{s.d}</div>
-            </div>
-            <div className="text-neon-cyan font-bold text-[10px]">${Math.round(base * s.mult)}</div>
-          </button>
-        ))}
-      </div>
-      <div className="mt-2 flex items-center justify-between text-[10px] text-white/60">
-        <span>Método: BBVA •••• 4821</span>
-        <span className="text-neon-lime">La competencia: ${Math.round(trip.fare * 1.31)} · Ahorras ${Math.round(trip.fare * 0.31)}</span>
+    <div className="mt-3">
+      <div className="glass rounded-2xl p-3">
+        <div className="grid grid-cols-2 gap-1.5">
+          {services.map((s) => (
+            <button
+              key={s.key}
+              onClick={() => setTrip({ ...trip, service: s.key, fare: Math.round(base * s.mult) })}
+              className={`rounded-lg p-2.5 text-left flex items-center gap-2 text-xs ${trip.service === s.key ? "bg-neon-cyan/15 border border-neon-cyan/40" : "bg-white/[0.03] border border-white/5"}`}
+            >
+              <s.icon className="h-4 w-4 text-neon-cyan shrink-0" />
+              <span className="font-semibold flex-1">{s.name}</span>
+              <span className="text-neon-cyan font-bold">${Math.round(base * s.mult)}</span>
+            </button>
+          ))}
+        </div>
       </div>
       <button
-        onClick={() => {
-          setTrip({ ...trip, status: "searching" });
-          // simulate driver assignment after 2.5s
-          setTimeout(() => {
-            setTrip((t) => ({
-              ...t,
-              status: "matched",
-              driver: { name: "Don Roberto Mendoza", plate: "JAL-1234", vehicle: "Nissan Tsuru blanco", rating: 4.97, score: 98 },
-            }));
-          }, 2500);
-        }}
-        className="mt-2 w-full rounded-xl bg-gradient-to-r from-neon-cyan to-neon-violet py-2.5 text-black font-bold text-xs"
+        onClick={confirmTrip}
+        className="mt-3 w-full rounded-xl bg-neon-cyan py-3.5 text-black font-bold text-sm active:scale-95 transition"
       >
-        Confirmar viaje ${trip.fare}
+        Pedir viaje · ${trip.fare}
       </button>
     </div>
   );

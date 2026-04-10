@@ -19,7 +19,7 @@ export default function Security() {
           <h2 className="font-display text-3xl md:text-4xl font-bold">
             Seguridad <span className="text-gradient">de verdad</span>.
           </h2>
-          <p className="mt-3 text-white/60">Construida con el C5 Jalisco y asociaciones de taxistas locales.</p>
+          <p className="mt-3 text-white/80">Construida con el C5 Jalisco y asociaciones de taxistas locales.</p>
         </motion.div>
 
         <div className="mt-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -34,7 +34,7 @@ export default function Security() {
             >
               <Icon className="h-5 w-5 text-neon-cyan mb-3" />
               <h3 className="font-semibold">{t}</h3>
-              <p className="mt-1 text-sm text-white/50">{d}</p>
+              <p className="mt-1 text-sm text-white/70">{d}</p>
             </motion.div>
           ))}
         </div>
