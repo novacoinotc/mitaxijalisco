@@ -9,7 +9,7 @@ import {
   AlertTriangle, X, BadgeCheck, Loader2, Receipt, HelpCircle,
   Accessibility, Crown, Truck, Send,
 } from "lucide-react";
-import AnimatedMap from "@/components/AnimatedMap";
+import RealMap from "@/components/RealMap";
 import {
   loadAppData, saveAppData, updateProfile, updatePayments, addTrip, getRandomDriver, calculateFare,
   type UserProfile, type PaymentMethod, type TripRecord, type DriverInfo, type ServiceType,
@@ -181,7 +181,7 @@ function HomeScreen({ profile, location, payments, onRequestTrip }: { profile: U
           </button>
         ))}
       </div>
-      <div className="mt-4 rounded-2xl overflow-hidden"><AnimatedMap progress={0} showCar={false} className="h-[180px]" /></div>
+      <div className="mt-4 rounded-2xl overflow-hidden"><RealMap progress={0} showCar={false} userLocation={location} className="h-[180px]" /></div>
     </div>
   );
 }
@@ -268,7 +268,7 @@ function ActiveTrip({ trip, setTrip, onComplete }: { trip: TripState; setTrip: (
           <button className="h-9 w-9 rounded-full bg-white/5 flex items-center justify-center"><MessageCircle className="h-4 w-4 text-[#10b981]" /></button>
         </div>
       </div></div>
-      <div className="flex-1 px-5"><AnimatedMap progress={trip.status==="arriving"?0.15:0.05} showRoute className="h-full rounded-2xl" /></div>
+      <div className="flex-1 px-5"><RealMap progress={trip.status==="arriving"?0.15:0.05} showRoute className="h-full rounded-2xl" /></div>
       <div className="px-5 py-4 space-y-2">
         <div className="bg-white/5 rounded-xl p-3 flex items-center justify-between"><span className="text-sm">{trip.status==="arriving"?"Llega en ~3 min":"Preparando"}</span><span className="font-bold text-[#10b981]">${ff}</span></div>
         <div className="flex gap-2">
@@ -288,7 +288,7 @@ function ActiveTrip({ trip, setTrip, onComplete }: { trip: TripState; setTrip: (
           <div><div className="text-xs text-white/60">En camino a</div><div className="font-bold">{trip.destination}</div></div>
           <div className="text-right"><div className="text-xs text-white/50">ETA</div><div className="text-lg font-bold text-[#10b981]">{eta} min</div></div>
         </div>
-        <div className="flex-1 px-5"><AnimatedMap progress={trip.progress} sosActive={sosOpen} className="h-full rounded-2xl" /></div>
+        <div className="flex-1 px-5"><RealMap progress={trip.progress} className="h-full rounded-2xl" /></div>
         <div className="px-5 py-3 space-y-2">
           <div className="bg-white/5 rounded-xl p-3 flex items-center justify-between text-sm"><div className="flex items-center gap-2"><Shield className="h-4 w-4 text-[#10b981]" /> Monitoreado</div><span className="text-[#10b981] text-xs">IA activa</span></div>
           <div className="flex gap-2">
