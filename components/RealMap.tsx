@@ -1,21 +1,21 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 
-// Guadalajara coordinates
 const GDL_CENTER: [number, number] = [20.6597, -103.3496];
 
-// Route points: Chapultepec → Vallarta → Américas → Patria (simplified)
-const ROUTE_POINTS: [number, number][] = [
-  [20.6690, -103.3620], // Origen: Chapultepec
-  [20.6680, -103.3580],
-  [20.6700, -103.3520],
-  [20.6720, -103.3460],
-  [20.6740, -103.3400],
-  [20.6770, -103.3350],
-  [20.6800, -103.3300],
-  [20.6830, -103.3250], // Destino: Av. Patria
-];
+// Destinos con coordenadas reales de GDL
+const DEST_COORDS: Record<string, [number, number]> = {
+  "Plaza del Sol, Zapopan": [20.6237, -103.4014],
+  "Andares, Zapopan": [20.7050, -103.4100],
+  "Aeropuerto Internacional GDL": [20.5218, -103.3111],
+  "Aeropuerto GDL": [20.5218, -103.3111],
+  "Centro Histórico, GDL": [20.6767, -103.3475],
+  "Centro Tlaquepaque": [20.6408, -103.3145],
+  "Centro de Tlaquepaque": [20.6408, -103.3145],
+  "Expo GDL": [20.6525, -103.4025],
+  "Expo Guadalajara": [20.6525, -103.4025],
+};
 
 export interface RealMapProps {
   progress?: number;
@@ -23,38 +23,70 @@ export interface RealMapProps {
   showCar?: boolean;
   originLabel?: string;
   destLabel?: string;
+  destination?: string;
   userLocation?: { lat: number; lng: number } | null;
   className?: string;
   interactive?: boolean;
+  showDriverApproach?: boolean;
+  driverEta?: number;
 }
 
-// Dynamically import to avoid SSR issues with Leaflet
 const MapInner = dynamic(() => Promise.resolve(MapComponent), { ssr: false });
 
 export default function RealMap(props: RealMapProps) {
   return <MapInner {...props} />;
 }
 
+// Fetch real route from OSRM (free, no API key needed)
+async function fetchRoute(origin: [number, number], dest: [number, number]): Promise<[number, number][]> {
+  try {
+    const url = `https://router.project-osrm.org/route/v1/driving/${origin[1]},${origin[0]};${dest[1]},${dest[0]}?overview=full&geometries=geojson`;
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.routes?.[0]?.geometry?.coordinates) {
+      // OSRM returns [lng, lat], we need [lat, lng]
+      return data.routes[0].geometry.coordinates.map((c: number[]) => [c[1], c[0]] as [number, number]);
+    }
+  } catch {}
+  // Fallback: straight line
+  return [origin, dest];
+}
+
 function MapComponent({
   progress = 0,
   showRoute = true,
   showCar = true,
-  originLabel = "Origen",
+  originLabel = "Tu ubicación",
   destLabel = "Destino",
+  destination,
   userLocation,
   className = "",
   interactive = false,
+  showDriverApproach = false,
+  driverEta,
 }: RealMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<any>(null);
   const carMarker = useRef<any>(null);
-  const routeLine = useRef<any>(null);
+  const routeLineRef = useRef<any>(null);
+  const originMarkerRef = useRef<any>(null);
+  const destMarkerRef = useRef<any>(null);
+  const routePoints = useRef<[number, number][]>([]);
   const [loaded, setLoaded] = useState(false);
+  const LRef = useRef<any>(null);
 
+  const originCoord: [number, number] = userLocation
+    ? [userLocation.lat, userLocation.lng]
+    : GDL_CENTER;
+
+  const destCoord: [number, number] = destination && DEST_COORDS[destination]
+    ? DEST_COORDS[destination]
+    : [20.6237, -103.4014]; // Default: Plaza del Sol
+
+  // Initialize map
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return;
 
-    // Load Leaflet CSS
     if (!document.querySelector('link[href*="leaflet"]')) {
       const link = document.createElement("link");
       link.rel = "stylesheet";
@@ -64,11 +96,11 @@ function MapComponent({
 
     import("leaflet").then((L) => {
       if (!mapRef.current) return;
+      LRef.current = L;
 
-      // Create map
       const map = L.map(mapRef.current, {
-        center: userLocation ? [userLocation.lat, userLocation.lng] : GDL_CENTER,
-        zoom: 13,
+        center: originCoord,
+        zoom: 14,
         zoomControl: false,
         attributionControl: false,
         dragging: interactive,
@@ -77,85 +109,99 @@ function MapComponent({
         doubleClickZoom: false,
       });
 
-      // Dark map tiles from CartoDB
       L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
         maxZoom: 19,
       }).addTo(map);
 
-      // Origin marker
-      const originCoord = userLocation
-        ? [userLocation.lat, userLocation.lng] as [number, number]
-        : ROUTE_POINTS[0];
-
-      const greenIcon = L.divIcon({
-        html: `<div style="width:14px;height:14px;border-radius:50%;background:#10b981;border:3px solid white;box-shadow:0 0 8px rgba(16,185,129,0.5)"></div>`,
+      // Origin marker (user location)
+      const originIcon = L.divIcon({
+        html: `<div style="position:relative">
+          <div style="width:16px;height:16px;border-radius:50%;background:#10b981;border:3px solid white;box-shadow:0 0 10px rgba(16,185,129,0.5)"></div>
+          <div style="position:absolute;top:-1px;left:-1px;width:18px;height:18px;border-radius:50%;border:2px solid rgba(16,185,129,0.3);animation:pulse 2s infinite"></div>
+        </div>`,
         className: "",
-        iconSize: [14, 14],
-        iconAnchor: [7, 7],
+        iconSize: [16, 16],
+        iconAnchor: [8, 8],
       });
+      originMarkerRef.current = L.marker(originCoord, { icon: originIcon }).addTo(map);
 
-      const destIcon = L.divIcon({
-        html: `<div style="width:14px;height:14px;border-radius:50%;background:#ef4444;border:3px solid white;box-shadow:0 0 8px rgba(239,68,68,0.5)"></div>`,
-        className: "",
-        iconSize: [14, 14],
-        iconAnchor: [7, 7],
-      });
+      mapInstance.current = map;
+      setLoaded(true);
+      setTimeout(() => map.invalidateSize(), 150);
+    });
 
-      L.marker(originCoord, { icon: greenIcon }).addTo(map).bindTooltip(originLabel, { permanent: false, direction: "top", className: "map-tooltip" });
-      L.marker(ROUTE_POINTS[ROUTE_POINTS.length - 1], { icon: destIcon }).addTo(map).bindTooltip(destLabel, { permanent: false, direction: "top", className: "map-tooltip" });
+    return () => {
+      if (mapInstance.current) { mapInstance.current.remove(); mapInstance.current = null; }
+    };
+  }, []);
 
-      // Route line
-      if (showRoute) {
-        routeLine.current = L.polyline(ROUTE_POINTS, {
-          color: "#10b981",
-          weight: 4,
-          opacity: 0.8,
-          dashArray: "8 6",
-        }).addTo(map);
+  // Load route when destination changes
+  useEffect(() => {
+    if (!loaded || !LRef.current || !mapInstance.current || !showRoute || !destination) return;
 
-        // Fit bounds to route
-        map.fitBounds(L.latLngBounds(ROUTE_POINTS), { padding: [30, 30] });
-      }
+    const L = LRef.current;
+    const map = mapInstance.current;
+
+    // Remove old route/markers
+    if (routeLineRef.current) { map.removeLayer(routeLineRef.current); routeLineRef.current = null; }
+    if (destMarkerRef.current) { map.removeLayer(destMarkerRef.current); destMarkerRef.current = null; }
+    if (carMarker.current) { map.removeLayer(carMarker.current); carMarker.current = null; }
+
+    // Update origin position
+    if (originMarkerRef.current) originMarkerRef.current.setLatLng(originCoord);
+
+    // Destination marker
+    const destIcon = L.divIcon({
+      html: `<div style="position:relative;display:flex;flex-direction:column;align-items:center">
+        <div style="width:12px;height:12px;border-radius:50%;background:#ef4444;border:2px solid white;box-shadow:0 0 8px rgba(239,68,68,0.5)"></div>
+        <div style="width:2px;height:6px;background:#ef4444;margin-top:-1px"></div>
+      </div>`,
+      className: "",
+      iconSize: [12, 18],
+      iconAnchor: [6, 18],
+    });
+    destMarkerRef.current = L.marker(destCoord, { icon: destIcon }).addTo(map);
+
+    // Fetch real route
+    fetchRoute(originCoord, destCoord).then((pts) => {
+      routePoints.current = pts;
+
+      // Draw route
+      routeLineRef.current = L.polyline(pts, {
+        color: "#10b981",
+        weight: 5,
+        opacity: 0.9,
+      }).addTo(map);
+
+      // Fit map to show full route
+      const bounds = L.latLngBounds([originCoord, destCoord]);
+      map.fitBounds(bounds, { padding: [40, 40] });
 
       // Car marker
       if (showCar) {
         const carIcon = L.divIcon({
-          html: `<div style="width:20px;height:20px;border-radius:50%;background:#10b981;border:3px solid white;box-shadow:0 0 12px rgba(16,185,129,0.6);display:flex;align-items:center;justify-content:center">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="white"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
+          html: `<div style="width:28px;height:28px;border-radius:50%;background:#10b981;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
           </div>`,
           className: "",
-          iconSize: [20, 20],
-          iconAnchor: [10, 10],
+          iconSize: [28, 28],
+          iconAnchor: [14, 14],
         });
-        carMarker.current = L.marker(ROUTE_POINTS[0], { icon: carIcon }).addTo(map);
+        carMarker.current = L.marker(pts[0], { icon: carIcon, zIndexOffset: 1000 }).addTo(map);
       }
-
-      mapInstance.current = map;
-      setLoaded(true);
-
-      // Force resize after mount
-      setTimeout(() => map.invalidateSize(), 100);
     });
+  }, [loaded, destination, userLocation?.lat, userLocation?.lng]);
 
-    return () => {
-      if (mapInstance.current) {
-        mapInstance.current.remove();
-        mapInstance.current = null;
-      }
-    };
-  }, []);
-
-  // Update car position when progress changes
+  // Move car along route
   useEffect(() => {
-    if (!carMarker.current || !loaded) return;
-
-    const idx = Math.min(Math.floor(progress * (ROUTE_POINTS.length - 1)), ROUTE_POINTS.length - 2);
-    const t = (progress * (ROUTE_POINTS.length - 1)) - idx;
-    const lat = ROUTE_POINTS[idx][0] + (ROUTE_POINTS[idx + 1][0] - ROUTE_POINTS[idx][0]) * t;
-    const lng = ROUTE_POINTS[idx][1] + (ROUTE_POINTS[idx + 1][1] - ROUTE_POINTS[idx][1]) * t;
-
+    if (!carMarker.current || routePoints.current.length < 2) return;
+    const pts = routePoints.current;
+    const idx = Math.min(Math.floor(progress * (pts.length - 1)), pts.length - 2);
+    const t = (progress * (pts.length - 1)) - idx;
+    const lat = pts[idx][0] + (pts[idx + 1][0] - pts[idx][0]) * t;
+    const lng = pts[idx][1] + (pts[idx + 1][1] - pts[idx][1]) * t;
     carMarker.current.setLatLng([lat, lng]);
-  }, [progress, loaded]);
+  }, [progress]);
 
   return (
     <div className={`relative overflow-hidden rounded-2xl ${className}`}>
@@ -165,9 +211,17 @@ function MapComponent({
           <div className="h-5 w-5 border-2 border-[#10b981] border-t-transparent rounded-full animate-spin" />
         </div>
       )}
+      {/* Driver ETA badge */}
+      {showDriverApproach && driverEta && (
+        <div className="absolute top-3 left-3 bg-black/80 backdrop-blur rounded-lg px-3 py-2 flex items-center gap-2 z-[400]">
+          <div className="h-2 w-2 rounded-full bg-[#10b981] animate-pulse" />
+          <span className="text-xs text-white font-semibold">{driverEta} min</span>
+        </div>
+      )}
       <style>{`
-        .map-tooltip { background: rgba(0,0,0,0.8); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 4px 8px; font-size: 11px; font-family: system-ui; }
+        .map-tooltip { background: rgba(0,0,0,0.85); color: white; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 4px 10px; font-size: 12px; font-family: system-ui; }
         .leaflet-container { background: #1a1a2e !important; }
+        @keyframes pulse { 0%,100% { transform: scale(1); opacity: 0.6; } 50% { transform: scale(1.8); opacity: 0; } }
       `}</style>
     </div>
   );

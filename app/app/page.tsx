@@ -49,7 +49,7 @@ export default function PassengerApp() {
       </div>
 
       {trip ? (
-        <ActiveTrip trip={trip} setTrip={setTrip} onComplete={(r) => { addTrip(r); reload(); setTrip(null); }} />
+        <ActiveTrip trip={trip} setTrip={setTrip} location={location} onComplete={(r) => { addTrip(r); reload(); setTrip(null); }} />
       ) : (
         <>
           <div className="pb-20 overflow-y-auto">
@@ -188,7 +188,7 @@ function HomeScreen({ profile, location, payments, onRequestTrip }: { profile: U
 
 interface TripState { status: "searching"|"negotiating"|"matched"|"arriving"|"inProgress"|"arrived"|"rating"; origin: string; destination: string; service: ServiceType; baseFare: number; offeredFare: number; paymentMethod: string; driver: DriverInfo|null; progress: number; }
 
-function ActiveTrip({ trip, setTrip, onComplete }: { trip: TripState; setTrip: (t: TripState|null) => void; onComplete: (r: TripRecord) => void }) {
+function ActiveTrip({ trip, setTrip, location, onComplete }: { trip: TripState; setTrip: (t: TripState|null) => void; location: {lat:number;lng:number}|null; onComplete: (r: TripRecord) => void }) {
   const [rating, setRating] = useState(0);
   const [tip, setTip] = useState(0);
   const [sosOpen, setSosOpen] = useState(false);
@@ -268,7 +268,7 @@ function ActiveTrip({ trip, setTrip, onComplete }: { trip: TripState; setTrip: (
           <button className="h-11 w-11 rounded-full bg-white/5 flex items-center justify-center"><MessageCircle className="h-4 w-4 text-[#10b981]" /></button>
         </div>
       </div></div>
-      <div className="flex-1 px-5"><RealMap progress={trip.status==="arriving"?0.15:0.05} showRoute className="h-full rounded-2xl" /></div>
+      <div className="flex-1 px-5"><RealMap progress={trip.status==="arriving"?0.15:0.05} showRoute destination={trip.destination} userLocation={location} showDriverApproach={trip.status==="arriving"} driverEta={3} className="h-full rounded-2xl" /></div>
       <div className="px-5 py-4 space-y-2">
         <div className="bg-white/5 rounded-xl p-3 flex items-center justify-between"><span className="text-sm">{trip.status==="arriving"?"Llega en ~3 min":"Preparando"}</span><span className="font-bold text-[#10b981]">${ff}</span></div>
         <div className="flex gap-2">
@@ -288,7 +288,7 @@ function ActiveTrip({ trip, setTrip, onComplete }: { trip: TripState; setTrip: (
           <div><div className="text-xs text-white/60">En camino a</div><div className="font-bold">{trip.destination}</div></div>
           <div className="text-right"><div className="text-xs text-white/50">ETA</div><div className="text-lg font-bold text-[#10b981]">{eta} min</div></div>
         </div>
-        <div className="flex-1 px-5"><RealMap progress={trip.progress} className="h-full rounded-2xl" /></div>
+        <div className="flex-1 px-5"><RealMap progress={trip.progress} showRoute destination={trip.destination} userLocation={location} className="h-full rounded-2xl" /></div>
         <div className="px-5 py-3 space-y-2">
           <div className="bg-white/5 rounded-xl p-3 flex items-center justify-between text-sm"><div className="flex items-center gap-2"><Shield className="h-4 w-4 text-[#10b981]" /> Monitoreado</div><span className="text-[#10b981] text-xs">IA activa</span></div>
           <div className="flex gap-2">
