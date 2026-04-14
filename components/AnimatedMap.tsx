@@ -223,10 +223,10 @@ export default function AnimatedMap({
       <div className="absolute bottom-2 right-2 rounded-lg px-3 py-2 text-[11px]" style={{ background: "rgba(36,47,62,0.9)", border: "1px solid rgba(255,255,255,0.15)" }}>
         <div className="flex items-center gap-1.5">
           <span className="h-1.5 w-1.5 rounded-full bg-[#10b981]" />
-          <span className="text-white/60 font-medium" style={{ fontSize: 9 }}>EN CAMINO</span>
+          <span className="text-white/60 font-medium" style={{ fontSize: 11 }}>EN CAMINO</span>
         </div>
         <div className="text-white font-bold text-base leading-tight">{Math.max(1, Math.round((1 - progress) * 8))} min</div>
-        <div className="text-white/40" style={{ fontSize: 9 }}>{(progress * 4.2).toFixed(1)} km</div>
+        <div className="text-white/40" style={{ fontSize: 11 }}>{(progress * 4.2).toFixed(1)} km</div>
       </div>
     </div>
   );

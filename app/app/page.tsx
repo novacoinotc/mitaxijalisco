@@ -62,7 +62,7 @@ export default function PassengerApp() {
           </div>
           <nav className="fixed bottom-0 inset-x-0 bg-black/95 border-t border-white/10 backdrop-blur flex items-center justify-around py-2 z-50">
             {([["home", Home, "Inicio"], ["trips", Clock, "Viajes"], ["profile", User, "Perfil"]] as const).map(([k, I, l]) => (
-              <button key={k} onClick={() => { setTab(k); setScreen("main"); }} className={`flex flex-col items-center gap-0.5 px-4 py-1 ${tab === k ? "text-[#10b981]" : "text-white/50"}`}>
+              <button key={k} onClick={() => { setTab(k); setScreen("main"); }} className={`flex flex-col items-center gap-1 px-5 py-2.5 min-h-[44px] ${tab === k ? "text-[#10b981]" : "text-white/50"}`}>
                 <I className="h-5 w-5" /><span className="text-[11px]">{l}</span>
               </button>
             ))}
@@ -136,7 +136,7 @@ function HomeScreen({ profile, location, payments, onRequestTrip }: { profile: U
       <div className="grid grid-cols-2 gap-2 mb-4">
         {([["normal",Car,"Normal","4 pers."],["grande",Truck,"Grande","5+ pers."],["accesible",Accessibility,"Accesible","Silla ruedas"],["ejecutivo",Crown,"Ejecutivo","Premium"]] as const).map(([k,I,l,d]) => (
           <button key={k} onClick={() => { setSvc(k as ServiceType); setCustom(""); }} className={`rounded-xl p-3 text-left flex items-center gap-2 ${svc===k?"bg-[#10b981]/15 border border-[#10b981]/40":"bg-white/5 border border-white/5"}`}>
-            <I className="h-4 w-4 text-[#10b981]" /><div><div className="text-xs font-semibold">{l}</div><div className="text-[10px] text-white/50">{d}</div></div>
+            <I className="h-4 w-4 text-[#10b981]" /><div><div className="text-xs font-semibold">{l}</div><div className="text-[11px] text-white/50">{d}</div></div>
           </button>
         ))}
       </div>
@@ -162,7 +162,7 @@ function HomeScreen({ profile, location, payments, onRequestTrip }: { profile: U
     <div className="px-5 pt-4">
       <div className="flex items-center justify-between mb-4">
         <div><div className="text-white/60 text-xs">Hola,</div><div className="text-lg font-bold">{profile.name||"Usuario"} 👋</div></div>
-        <div className="h-9 w-9 rounded-full bg-white/5 flex items-center justify-center"><Bell className="h-4 w-4 text-white/60" /></div>
+        <div className="h-11 w-11 rounded-full bg-white/5 flex items-center justify-center"><Bell className="h-4 w-4 text-white/60" /></div>
       </div>
       <div className="bg-white/5 rounded-2xl p-4 mb-4">
         <div className="flex items-center gap-2 text-sm"><div className="h-2 w-2 rounded-full bg-[#10b981]" /><span className="text-white/70">Tu ubicación</span></div>
@@ -253,7 +253,7 @@ function ActiveTrip({ trip, setTrip, onComplete }: { trip: TripState; setTrip: (
   );
 
   if (trip.status==="matched"||trip.status==="arriving") return (
-    <div className="fixed inset-0 bg-black z-50 flex flex-col">
+    <div className="fixed inset-0 bg-black z-50 flex flex-col overflow-y-auto">
       <div className="px-5 pt-4 pb-2"><div className="text-xs text-[#10b981] font-semibold">{trip.status==="arriving"?"EN CAMINO":"ASIGNADO"}</div></div>
       <div className="px-5 mb-3"><div className="bg-white/5 rounded-2xl p-4 flex items-center gap-3">
         <div className="h-14 w-14 rounded-full bg-[#10b981]/20 flex items-center justify-center"><User className="h-7 w-7 text-[#10b981]" /></div>
@@ -264,8 +264,8 @@ function ActiveTrip({ trip, setTrip, onComplete }: { trip: TripState; setTrip: (
           <div className="text-[11px] text-white/40">{trip.driver?.siteNumber}</div>
         </div>
         <div className="flex flex-col gap-1.5">
-          <button className="h-9 w-9 rounded-full bg-white/5 flex items-center justify-center"><Phone className="h-4 w-4 text-[#10b981]" /></button>
-          <button className="h-9 w-9 rounded-full bg-white/5 flex items-center justify-center"><MessageCircle className="h-4 w-4 text-[#10b981]" /></button>
+          <button className="h-11 w-11 rounded-full bg-white/5 flex items-center justify-center"><Phone className="h-4 w-4 text-[#10b981]" /></button>
+          <button className="h-11 w-11 rounded-full bg-white/5 flex items-center justify-center"><MessageCircle className="h-4 w-4 text-[#10b981]" /></button>
         </div>
       </div></div>
       <div className="flex-1 px-5"><RealMap progress={trip.status==="arriving"?0.15:0.05} showRoute className="h-full rounded-2xl" /></div>
@@ -283,7 +283,7 @@ function ActiveTrip({ trip, setTrip, onComplete }: { trip: TripState; setTrip: (
   if (trip.status==="inProgress") {
     const eta = Math.max(1,Math.round(18*(1-trip.progress)));
     return (
-      <div className="fixed inset-0 bg-black z-50 flex flex-col">
+      <div className="fixed inset-0 bg-black z-50 flex flex-col overflow-y-auto">
         <div className="px-5 pt-4 pb-2 flex items-center justify-between">
           <div><div className="text-xs text-white/60">En camino a</div><div className="font-bold">{trip.destination}</div></div>
           <div className="text-right"><div className="text-xs text-white/50">ETA</div><div className="text-lg font-bold text-[#10b981]">{eta} min</div></div>
@@ -458,7 +458,7 @@ function PaymentsScreen({ payments, onUpdate, onBack }: { payments: PaymentMetho
             <div className="flex-1"><div className="text-sm">{p.label}</div>{p.last4 && <div className="text-[11px] text-white/50">•••• {p.last4}</div>}</div>
             <div className="flex items-center gap-2">
               {!p.isDefault && <button onClick={() => onUpdate(payments.map(x => ({...x, isDefault:x.id===p.id})))} className="text-[11px] text-[#10b981]">Usar</button>}
-              {p.isDefault && <span className="text-[10px] bg-[#10b981]/20 text-[#10b981] rounded-full px-2 py-0.5">Default</span>}
+              {p.isDefault && <span className="text-[11px] bg-[#10b981]/20 text-[#10b981] rounded-full px-2 py-0.5">Default</span>}
               {p.id!=="cash" && <button onClick={() => onUpdate(payments.filter(x => x.id!==p.id))} className="text-red-400/60"><Trash2 className="h-3.5 w-3.5" /></button>}
             </div>
           </div>
