@@ -1,835 +1,511 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
-import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
 import {
   Car, MapPin, Star, Phone, MessageCircle, Siren, CheckCircle2,
-  CreditCard, Banknote, Smartphone, Users, Shield, Navigation, Radar,
-  ArrowLeft, Home, Clock, Heart, Package, ShoppingBasket, Pill,
-  Plane, Dog, Baby, BadgeCheck, Fingerprint, ThumbsUp, Gift, ChevronRight,
-  X, Plus, User, Wallet, Bell, Settings, History, LogOut,
+  CreditCard, Banknote, Smartphone, Users, Shield, Radar,
+  Home, Clock, ChevronRight, ChevronLeft,
+  User, Wallet, Bell, Settings, History, Plus, Trash2, Edit3,
+  AlertTriangle, X, BadgeCheck, Loader2, Receipt, HelpCircle,
+  Accessibility, Crown, Truck, Send,
 } from "lucide-react";
-
-/* =========================  SHARED STATE  ========================= */
-
-type TripStatus =
-  | "idle" | "selecting" | "requesting" | "searching" | "matched"
-  | "arriving" | "pickedup" | "onroute" | "arrived" | "paid" | "rated";
-
-type Service = "ride" | "shared" | "envios" | "super" | "favor" | "farmacia" | "pet" | "aeropuerto";
-
-interface TripState {
-  status: TripStatus;
-  origin: string;
-  destination: string;
-  service: Service;
-  fare: number;
-  distance: number;
-  duration: number;
-  driver: { name: string; plate: string; vehicle: string; rating: number; score: number } | null;
-  paymentMethod: "card" | "cash" | "codi";
-  carProgress: number; // 0-1
-  sosActive: boolean;
-  rating: number;
-  tipAmount: number;
-}
-
-const initialTrip: TripState = {
-  status: "idle",
-  origin: "Av. Chapultepec 123, Guadalajara",
-  destination: "",
-  service: "ride",
-  fare: 0,
-  distance: 0,
-  duration: 0,
-  driver: null,
-  paymentMethod: "card",
-  carProgress: 0,
-  sosActive: false,
-  rating: 0,
-  tipAmount: 0,
-};
-
-/* =========================  PAGE  ========================= */
-
-export default function FullApp() {
-  const [trip, setTrip] = useState<TripState>(initialTrip);
-  const [view, setView] = useState<"both" | "passenger" | "driver">(typeof window !== "undefined" && window.innerWidth < 768 ? "passenger" : "both");
-
-  // car progress animation while onroute
-  useEffect(() => {
-    if (trip.status !== "onroute") return;
-    const id = setInterval(() => {
-      setTrip((t) => {
-        if (t.carProgress >= 1) {
-          clearInterval(id);
-          return { ...t, carProgress: 1, status: "arrived" };
-        }
-        return { ...t, carProgress: Math.min(1, t.carProgress + 0.02) };
-      });
-    }, 200);
-    return () => clearInterval(id);
-  }, [trip.status]);
-
-  // arriving animation
-  useEffect(() => {
-    if (trip.status !== "arriving") return;
-    const id = setInterval(() => {
-      setTrip((t) => {
-        if (t.carProgress >= 0.2) { clearInterval(id); return t; }
-        return { ...t, carProgress: Math.min(0.2, t.carProgress + 0.015) };
-      });
-    }, 200);
-    return () => clearInterval(id);
-  }, [trip.status]);
-
-  return (
-    <div className="min-h-screen relative">
-      <header className="border-b border-white/10 glass sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-neon-cyan to-neon-violet" />
-            <span className="font-display font-bold">Mi Taxi <span className="text-gradient">Jalisco</span></span>
-            <span className="ml-2 text-[10px] uppercase tracking-wider glass rounded-full px-2 py-0.5 text-white/60">App en vivo</span>
-          </Link>
-          <div className="flex items-center gap-1 sm:gap-2">
-            <div className="glass rounded-full p-0.5 sm:p-1 flex text-[10px] sm:text-xs">
-              <button onClick={() => setView("both")} className={`px-2 sm:px-3 py-1.5 rounded-full hidden sm:block ${view === "both" ? "bg-neon-cyan text-black font-semibold" : "text-white/60"}`}>Ambas</button>
-              <button onClick={() => setView("passenger")} className={`px-2 sm:px-3 py-1.5 rounded-full ${view === "passenger" ? "bg-neon-cyan text-black font-semibold" : "text-white/60"}`}>Pasajero</button>
-              <button onClick={() => setView("driver")} className={`px-2 sm:px-3 py-1.5 rounded-full ${view === "driver" ? "bg-neon-lime text-black font-semibold" : "text-white/60"}`}>Conductor</button>
-            </div>
-            <button onClick={() => setTrip(initialTrip)} className="glass rounded-full px-3 py-1.5 text-xs hover:bg-white/10">Reset</button>
-          </div>
-        </div>
-      </header>
-
-      <div className="max-w-7xl mx-auto px-6 py-10">
-        <div className={`grid gap-10 ${view === "both" ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1 max-w-md mx-auto"}`}>
-          {(view === "both" || view === "passenger") && (
-            <div>
-              <div className="text-center mb-4">
-                <div className="text-xs uppercase tracking-[0.25em] text-neon-cyan">App del pasajero</div>
-                <div className="text-sm text-white/60">Sofía Ramírez · ⭐ 4.9</div>
-              </div>
-              <PassengerApp trip={trip} setTrip={setTrip} />
-            </div>
-          )}
-          {(view === "both" || view === "driver") && (
-            <div>
-              <div className="text-center mb-4">
-                <div className="text-xs uppercase tracking-[0.25em] text-neon-lime">App del conductor</div>
-                <div className="text-sm text-white/60">Don Roberto Mendoza · ⭐ 4.97 · JAL-1234</div>
-              </div>
-              <DriverApp trip={trip} setTrip={setTrip} />
-            </div>
-          )}
-        </div>
-
-        <div className="mt-10 glass rounded-2xl p-5 max-w-3xl mx-auto text-sm">
-          <div className="font-display font-bold mb-2">🎮 Cómo usarla en vivo</div>
-          <ol className="space-y-1.5 text-white/70 list-decimal list-inside">
-            <li>En el lado del <b className="text-neon-cyan">pasajero</b>, elige un destino, el servicio y confirma.</li>
-            <li>El lado del <b className="text-neon-lime">conductor</b> recibe la solicitud en tiempo real. Tócala para aceptar.</li>
-            <li>Avanza el viaje con los botones "Ya llegué / Iniciar viaje / Terminar" en la app del conductor.</li>
-            <li>Al final, el pasajero califica, deja propina y reseña.</li>
-            <li>Usa el botón rojo <b className="text-red-400">SOS</b> en cualquier momento para ver la alerta de pánico conectada al C5.</li>
-          </ol>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* =========================  PHONE FRAME  ========================= */
-
-function PhoneFrame({ children, nav }: { children: React.ReactNode; nav?: React.ReactNode }) {
-  return (
-    <div className="glass rounded-[32px] sm:rounded-[44px] p-2 sm:p-3 mx-auto w-[calc(100%-16px)] sm:w-full max-w-[380px]">
-      <div className="rounded-[26px] sm:rounded-[36px] bg-gradient-to-b from-jalisco-900 to-black h-[min(calc(100vh-160px),640px)] sm:h-[720px] flex flex-col">
-        <div className="h-6 flex items-center justify-center shrink-0"><div className="h-1 w-14 rounded-full bg-white/20" /></div>
-        <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide">{children}</div>
-        {nav && <div className="shrink-0 border-t border-white/10 bg-black/80 backdrop-blur">{nav}</div>}
-      </div>
-    </div>
-  );
-}
-
-/* =========================  MAP  ========================= */
 import AnimatedMap from "@/components/AnimatedMap";
+import {
+  loadAppData, saveAppData, updateProfile, updatePayments, addTrip, getRandomDriver, calculateFare,
+  type UserProfile, type PaymentMethod, type TripRecord, type DriverInfo, type ServiceType,
+} from "@/lib/store";
 
-function GdlMap({ progress = 0, showRoute = true, sosRing = false, car = true }: { progress?: number; showRoute?: boolean; sosRing?: boolean; car?: boolean }) {
-  return <AnimatedMap progress={progress} showRoute={showRoute} sosActive={sosRing} showCar={car} className="h-[200px]" />;
-}
+export default function PassengerApp() {
+  const [data, setData] = useState(() => loadAppData());
+  const [tab, setTab] = useState<"home" | "trips" | "profile">("home");
+  const [screen, setScreen] = useState("main");
+  const [trip, setTrip] = useState<TripState | null>(null);
+  const [location, setLocation] = useState<{ lat: number; lng: number; address: string } | null>(null);
 
-/* =========================  PASSENGER APP  ========================= */
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+        setLocation({ lat, lng, address: approxAddress(lat, lng) });
+      },
+      () => setLocation({ lat: 20.6597, lng: -103.3496, address: "Guadalajara, Jalisco" }),
+      { enableHighAccuracy: false, timeout: 5000 }
+    );
+  }, []);
 
-function PassengerApp({ trip, setTrip }: { trip: TripState; setTrip: (u: TripState | ((t: TripState) => TripState)) => void }) {
-  const [tab, setTab] = useState<"home" | "history" | "profile">("home");
-  const [sosOpen, setSosOpen] = useState(false);
+  const reload = useCallback(() => setData(loadAppData()), []);
 
-  const bottomNav = (
-    <div className="flex items-center justify-around py-3 px-2">
-      <button onClick={() => setTab("home")} className={`flex flex-col items-center gap-0.5 ${tab === "home" ? "text-neon-cyan" : "text-white/50"}`}><Home className="h-4 w-4" /><span className="text-[10px]">Inicio</span></button>
-      <button onClick={() => setTab("history")} className={`flex flex-col items-center gap-0.5 ${tab === "history" ? "text-neon-cyan" : "text-white/50"}`}><History className="h-4 w-4" /><span className="text-[10px]">Historial</span></button>
-      <button onClick={() => setTab("profile")} className={`flex flex-col items-center gap-0.5 ${tab === "profile" ? "text-neon-cyan" : "text-white/50"}`}><User className="h-4 w-4" /><span className="text-[10px]">Perfil</span></button>
-    </div>
-  );
+  if (!data.onboarded && screen === "main") {
+    return <OnboardingScreen onDone={(p) => { updateProfile(p); reload(); }} />;
+  }
 
   return (
-    <PhoneFrame nav={bottomNav}>
-      <div className="flex flex-col px-5 pb-4">
-        {tab === "home" && <PassengerHome trip={trip} setTrip={setTrip} openSos={() => setSosOpen(true)} />}
-        {tab === "history" && <PassengerHistory />}
-        {tab === "profile" && <PassengerProfile />}
+    <div className="min-h-screen bg-black text-white">
+      <div className="bg-black px-5 pt-3 pb-1 flex items-center justify-between text-[11px] text-white/60">
+        <span>{new Date().toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}</span>
+        <span className="font-semibold text-white text-xs">Mi Taxi Jalisco</span>
+        <span>●●●○ 🔋</span>
       </div>
 
-      <AnimatePresence>
-        {sosOpen && <SosModal onClose={() => setSosOpen(false)} />}
-      </AnimatePresence>
-    </PhoneFrame>
-  );
-}
-
-function PassengerHome({ trip, setTrip, openSos }: { trip: TripState; setTrip: (u: TripState | ((t: TripState) => TripState)) => void; openSos: () => void }) {
-  const [dest, setDest] = useState("");
-  const [showServices, setShowServices] = useState(false);
-
-  const presets = [
-    { label: "Plaza del Sol", addr: "Plaza del Sol, Zapopan", km: 8.4, min: 18, fare: 68 },
-    { label: "Andares", addr: "Andares, Zapopan", km: 10.2, min: 22, fare: 82 },
-    { label: "Aeropuerto GDL", addr: "Aeropuerto Internacional GDL", km: 18.5, min: 35, fare: 280 },
-    { label: "Tlaquepaque Centro", addr: "Centro de Tlaquepaque", km: 7.1, min: 16, fare: 62 },
-  ];
-
-  if (trip.status === "idle" || trip.status === "selecting") {
-    return (
-      <div className="h-full flex flex-col pb-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-xs text-white/60">Buenas tardes</div>
-            <div className="font-display text-lg font-bold">Sofía 👋</div>
+      {trip ? (
+        <ActiveTrip trip={trip} setTrip={setTrip} onComplete={(r) => { addTrip(r); reload(); setTrip(null); }} />
+      ) : (
+        <>
+          <div className="pb-20 overflow-y-auto">
+            {tab === "home" && screen === "main" && <HomeScreen profile={data.profile} location={location} payments={data.payments} onRequestTrip={(d, s, f, n, p) => setTrip({ status: "searching", origin: location?.address || "Tu ubicación", destination: d, service: s, baseFare: f, offeredFare: n, paymentMethod: p, driver: null, progress: 0 })} />}
+            {tab === "home" && screen === "payments" && <PaymentsScreen payments={data.payments} onUpdate={(p) => { updatePayments(p); reload(); }} onBack={() => setScreen("main")} />}
+            {tab === "home" && screen === "support" && <SupportScreen onBack={() => setScreen("main")} />}
+            {tab === "trips" && <TripsScreen trips={data.trips} />}
+            {tab === "profile" && screen === "main" && <ProfileScreen profile={data.profile} trips={data.trips} onEdit={() => setScreen("editProfile")} onPay={() => { setTab("home"); setScreen("payments"); }} onHelp={() => { setTab("home"); setScreen("support"); }} />}
+            {tab === "profile" && screen === "editProfile" && <EditProfileScreen profile={data.profile} onSave={(p) => { updateProfile(p); reload(); setScreen("main"); }} onBack={() => setScreen("main")} />}
           </div>
-          <div className="glass rounded-full p-2"><Bell className="h-4 w-4" /></div>
-        </div>
-
-        <div className="mt-3"><GdlMap showRoute={false} car={false} /></div>
-
-        <div className="mt-3 glass rounded-2xl p-3">
-          <div className="text-xs text-white/60 mb-2">¿A dónde vamos?</div>
-          <div className="flex items-center gap-2 rounded-xl bg-white/5 p-2.5">
-            <MapPin className="h-4 w-4 text-neon-cyan" />
-            <input
-              value={dest}
-              onChange={(e) => setDest(e.target.value)}
-              placeholder="Buscar destino…"
-              className="bg-transparent flex-1 text-sm outline-none placeholder-white/30"
-            />
-          </div>
-          <div className="mt-2 space-y-1.5">
-            {presets.filter(p => !dest || p.label.toLowerCase().includes(dest.toLowerCase())).slice(0, 4).map((p) => (
-              <button
-                key={p.label}
-                onClick={() => {
-                  setTrip({ ...trip, status: "selecting", destination: p.addr, distance: p.km, duration: p.min, fare: p.fare });
-                  setShowServices(true);
-                }}
-                className="w-full text-left flex items-center gap-2 rounded-lg bg-white/[0.03] hover:bg-white/10 p-2 text-xs"
-              >
-                <MapPin className="h-3 w-3 text-neon-pink shrink-0" />
-                <div className="flex-1">
-                  <div className="font-semibold">{p.label}</div>
-                  <div className="text-white/50 text-[10px]">{p.km} km · {p.min} min</div>
-                </div>
-                <div className="text-neon-cyan font-semibold">${p.fare}</div>
+          <nav className="fixed bottom-0 inset-x-0 bg-black/95 border-t border-white/10 backdrop-blur flex items-center justify-around py-2 z-50">
+            {([["home", Home, "Inicio"], ["trips", Clock, "Viajes"], ["profile", User, "Perfil"]] as const).map(([k, I, l]) => (
+              <button key={k} onClick={() => { setTab(k); setScreen("main"); }} className={`flex flex-col items-center gap-0.5 px-4 py-1 ${tab === k ? "text-[#10b981]" : "text-white/50"}`}>
+                <I className="h-5 w-5" /><span className="text-[11px]">{l}</span>
               </button>
             ))}
-          </div>
-        </div>
+          </nav>
+        </>
+      )}
+    </div>
+  );
+}
 
-        {showServices && trip.destination && <ServicePicker trip={trip} setTrip={setTrip} />}
+function approxAddress(lat: number, lng: number) {
+  if (lat > 20.7) return "Zapopan, Jalisco";
+  if (lat < 20.63) return "Tlaquepaque, Jalisco";
+  return "Guadalajara, Jalisco";
+}
+
+function OnboardingScreen({ onDone }: { onDone: (p: UserProfile) => void }) {
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  return (
+    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6">
+      <div className="w-full max-w-sm">
+        <div className="h-12 w-12 rounded-xl bg-[#10b981] flex items-center justify-center mb-6"><Car className="h-6 w-6 text-black" /></div>
+        <h1 className="text-2xl font-bold">Bienvenido a Mi Taxi Jalisco</h1>
+        <p className="text-white/60 mt-2 text-sm">Configura tu perfil para empezar.</p>
+        <div className="mt-6 space-y-3">
+          <input value={name} onChange={e => setName(e.target.value)} placeholder="Tu nombre completo" className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm placeholder-white/30 focus:outline-none focus:border-[#10b981]/50" />
+          <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="Teléfono" className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm placeholder-white/30 focus:outline-none focus:border-[#10b981]/50" />
+          <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Correo" type="email" className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm placeholder-white/30 focus:outline-none focus:border-[#10b981]/50" />
+        </div>
+        <button onClick={() => { if(name.trim()) onDone({ name: name.trim(), phone: phone.trim(), email: email.trim(), photo: "", emergencyContacts: [] }); }} disabled={!name.trim()} className="mt-6 w-full rounded-xl bg-[#10b981] py-3.5 text-black font-bold disabled:opacity-40">Comenzar</button>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
-  if (trip.status === "requesting" || trip.status === "searching") {
-    return (
-      <div className="h-full flex flex-col items-center justify-center text-center pb-4">
-        <motion.div animate={{ scale: [1, 1.15, 1] }} transition={{ repeat: Infinity, duration: 2 }} className="h-24 w-24 rounded-full bg-gradient-to-br from-neon-cyan to-neon-violet glow flex items-center justify-center">
-          <Radar className="h-10 w-10 text-black" />
-        </motion.div>
-        <div className="mt-5 font-display text-lg font-bold">Buscando conductor…</div>
-        <div className="mt-1 text-xs text-white/60">Priorizando los más cercanos</div>
-        <div className="mt-5 w-full glass rounded-xl p-3 text-[11px] text-white/70 space-y-1.5">
-          <div className="flex items-center gap-2"><CheckCircle2 className="h-3 w-3 text-neon-lime" /> Algoritmo local GDL activado</div>
-          <div className="flex items-center gap-2"><CheckCircle2 className="h-3 w-3 text-neon-lime" /> Filtrando por rating ≥ 4.8</div>
-          <div className="flex items-center gap-2"><Radar className="h-3 w-3 text-neon-cyan animate-pulse" /> Notificando conductores…</div>
+const DESTS = [
+  { label: "Plaza del Sol", addr: "Plaza del Sol, Zapopan", km: 8.4, min: 18 },
+  { label: "Andares", addr: "Andares, Zapopan", km: 10.2, min: 22 },
+  { label: "Aeropuerto GDL", addr: "Aeropuerto GDL", km: 18.5, min: 35 },
+  { label: "Centro Histórico", addr: "Centro Histórico, GDL", km: 5.2, min: 14 },
+  { label: "Tlaquepaque", addr: "Centro Tlaquepaque", km: 7.1, min: 16 },
+  { label: "Expo Guadalajara", addr: "Expo GDL", km: 6.8, min: 15 },
+];
+
+function HomeScreen({ profile, location, payments, onRequestTrip }: { profile: UserProfile; location: any; payments: PaymentMethod[]; onRequestTrip: (d: string, s: ServiceType, f: number, n: number, p: string) => void }) {
+  const [dest, setDest] = useState("");
+  const [sel, setSel] = useState<typeof DESTS[0] | null>(null);
+  const [svc, setSvc] = useState<ServiceType>("normal");
+  const [custom, setCustom] = useState("");
+
+  const fare = sel ? calculateFare(sel.km, svc) : 0;
+  const offered = custom ? parseInt(custom) : fare;
+  const pm = payments.find(p => p.isDefault);
+
+  if (sel) return (
+    <div className="px-5 pt-4">
+      <button onClick={() => setSel(null)} className="flex items-center gap-1 text-white/60 text-sm mb-4"><ChevronLeft className="h-4 w-4" /> Cambiar destino</button>
+      <div className="bg-white/5 rounded-2xl p-4 mb-4">
+        <div className="flex items-center gap-3">
+          <div className="flex flex-col items-center gap-1"><div className="h-2.5 w-2.5 rounded-full bg-[#10b981]" /><div className="w-px h-8 bg-white/20" /><div className="h-2.5 w-2.5 rounded-full border-2 border-[#10b981]" /></div>
+          <div className="flex-1 space-y-3">
+            <div><div className="text-[11px] text-white/50">Origen</div><div className="text-sm">{location?.address || "Tu ubicación"}</div></div>
+            <div><div className="text-[11px] text-white/50">Destino</div><div className="text-sm">{sel.label}</div></div>
+          </div>
         </div>
-        <button onClick={() => setTrip({ ...initialTrip })} className="mt-4 text-xs text-red-400">Cancelar solicitud</button>
+        <div className="flex gap-3 text-xs text-white/50 mt-2">{sel.km} km · ~{sel.min} min</div>
       </div>
-    );
-  }
-
-  if (trip.status === "matched" || trip.status === "arriving") {
-    return (
-      <div className="h-full flex flex-col pb-4">
-        <div className="text-[10px] text-neon-cyan font-semibold">CONDUCTOR ASIGNADO</div>
-        <div className="mt-1 glass rounded-xl p-3 flex items-center gap-3">
-          <div className="h-12 w-12 rounded-full bg-gradient-to-br from-neon-lime to-neon-cyan ring-2 ring-neon-lime/40" />
-          <div className="flex-1">
-            <div className="flex items-center gap-1">
-              <div className="font-bold text-sm">{trip.driver?.name}</div>
-              <BadgeCheck className="h-3.5 w-3.5 text-neon-cyan" />
-            </div>
-            <div className="flex items-center gap-1 text-[10px]">
-              <Star className="h-2.5 w-2.5 text-yellow-400 fill-yellow-400" />
-              <span>{trip.driver?.rating}</span>
-              <span className="text-white/50">· {trip.driver?.vehicle}</span>
-            </div>
-            <div className="text-[10px] text-white/50">{trip.driver?.plate}</div>
-          </div>
-          <div className="flex flex-col gap-1">
-            <button className="h-7 w-7 rounded-full bg-neon-cyan/15 border border-neon-cyan/30 flex items-center justify-center"><Phone className="h-3 w-3 text-neon-cyan" /></button>
-            <button className="h-7 w-7 rounded-full bg-neon-cyan/15 border border-neon-cyan/30 flex items-center justify-center"><MessageCircle className="h-3 w-3 text-neon-cyan" /></button>
-          </div>
-        </div>
-        <div className="mt-3"><GdlMap progress={trip.carProgress} /></div>
-        <div className="mt-3 glass rounded-xl p-3 flex items-center justify-between text-sm">
-          <span>Llega en</span>
-          <span className="font-display text-lg font-bold text-neon-cyan">
-            {trip.status === "arriving" ? "1 min" : "3 min"}
-          </span>
-        </div>
-        <div className="mt-2 glass rounded-xl p-2.5 text-[10px] flex items-center gap-2 bg-neon-cyan/5">
-          <Users className="h-3 w-3 text-neon-cyan" />
-          <span className="flex-1">Viaje compartido con mamá, papá y Carlos ✓</span>
-        </div>
-        <button onClick={openSos} className="mt-auto rounded-xl bg-red-500/15 border border-red-500/40 py-3 text-red-400 font-semibold text-sm flex items-center justify-center gap-2">
-          <Siren className="h-4 w-4" /> SOS · Emergencia
-        </button>
-      </div>
-    );
-  }
-
-  if (trip.status === "pickedup" || trip.status === "onroute") {
-    return (
-      <div className="h-full flex flex-col pb-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-[10px] text-white/60">En camino a</div>
-            <div className="font-display text-sm font-bold">{trip.destination}</div>
-          </div>
-          <div className="text-right">
-            <div className="text-[10px] text-white/50">ETA</div>
-            <div className="font-display text-sm font-bold text-neon-cyan">{Math.max(1, Math.round(trip.duration * (1 - trip.carProgress)))} min</div>
-          </div>
-        </div>
-        <div className="mt-2"><GdlMap progress={Math.max(0.2, trip.carProgress)} sosRing={trip.sosActive} /></div>
-        <div className="mt-2 grid grid-cols-3 gap-1.5 text-center">
-          <div className="glass rounded-lg p-1.5"><div className="text-[11px] text-white/50">Distancia</div><div className="text-xs font-bold">{(trip.distance * (1 - trip.carProgress)).toFixed(1)} km</div></div>
-          <div className="glass rounded-lg p-1.5"><div className="text-[11px] text-white/50">Velocidad</div><div className="text-xs font-bold">38 km/h</div></div>
-          <div className="glass rounded-lg p-1.5"><div className="text-[11px] text-white/50">Tarifa</div><div className="text-xs font-bold text-gradient">${trip.fare}</div></div>
-        </div>
-        <div className="mt-2 glass rounded-lg p-2 text-[11px] flex items-center gap-2 bg-neon-lime/5">
-          <Radar className="h-3 w-3 text-neon-lime" />
-          <span className="text-neon-lime font-semibold">Ruta óptima · IA activa</span>
-          <span className="text-white/50 ml-auto">Mamá viendo en vivo 👁️</span>
-        </div>
-        <div className="mt-auto flex gap-1">
-          <button className="flex-1 glass rounded-lg py-2 text-[10px] font-semibold">Compartir</button>
-          <button className="flex-1 glass rounded-lg py-2 text-[10px] font-semibold">Chat</button>
-          <button onClick={openSos} className="flex-1 rounded-lg bg-red-500/15 border border-red-500/40 py-2 text-[10px] font-bold text-red-400 flex items-center justify-center gap-1">
-            <Siren className="h-3 w-3" /> SOS
+      <div className="text-xs text-white/60 mb-2">Tipo de servicio</div>
+      <div className="grid grid-cols-2 gap-2 mb-4">
+        {([["normal",Car,"Normal","4 pers."],["grande",Truck,"Grande","5+ pers."],["accesible",Accessibility,"Accesible","Silla ruedas"],["ejecutivo",Crown,"Ejecutivo","Premium"]] as const).map(([k,I,l,d]) => (
+          <button key={k} onClick={() => { setSvc(k as ServiceType); setCustom(""); }} className={`rounded-xl p-3 text-left flex items-center gap-2 ${svc===k?"bg-[#10b981]/15 border border-[#10b981]/40":"bg-white/5 border border-white/5"}`}>
+            <I className="h-4 w-4 text-[#10b981]" /><div><div className="text-xs font-semibold">{l}</div><div className="text-[10px] text-white/50">{d}</div></div>
           </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (trip.status === "arrived") {
-    return (
-      <div className="h-full flex flex-col pb-4">
-        <div className="flex-1 flex flex-col items-center justify-center text-center">
-          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="h-20 w-20 rounded-full bg-neon-lime/15 border-2 border-neon-lime/40 flex items-center justify-center">
-            <CheckCircle2 className="h-10 w-10 text-neon-lime" />
-          </motion.div>
-          <div className="mt-3 font-display text-xl font-bold">¡Llegaste!</div>
-          <div className="text-xs text-white/60">{trip.destination}</div>
-          <div className="mt-4 w-full glass rounded-2xl p-3 text-xs">
-            <div className="grid grid-cols-3 gap-2 text-center">
-              <div><div className="text-[10px] text-white/50">Duración</div><div className="font-bold">{trip.duration} min</div></div>
-              <div><div className="text-[10px] text-white/50">Distancia</div><div className="font-bold">{trip.distance} km</div></div>
-              <div><div className="text-[10px] text-white/50">Total</div><div className="font-bold text-gradient">${trip.fare}</div></div>
-            </div>
-          </div>
-        </div>
-        <button onClick={() => setTrip({ ...trip, status: "paid" })} className="rounded-xl bg-gradient-to-r from-neon-cyan to-neon-violet py-3 text-black font-bold text-sm">Pagar ${trip.fare}</button>
-      </div>
-    );
-  }
-
-  if (trip.status === "paid") {
-    return (
-      <div className="h-full flex flex-col pb-4">
-        <div className="text-xs text-white/60">Califica tu viaje</div>
-        <div className="flex items-center gap-3 mt-2">
-          <div className="h-12 w-12 rounded-full bg-gradient-to-br from-neon-lime to-neon-cyan" />
-          <div><div className="font-bold text-sm">{trip.driver?.name}</div><div className="text-[10px] text-white/50">{trip.driver?.vehicle}</div></div>
-        </div>
-        <div className="mt-4 flex justify-center gap-1">
-          {[1,2,3,4,5].map((i) => (
-            <button key={i} onClick={() => setTrip({ ...trip, rating: i })}>
-              <Star className={`h-9 w-9 ${i <= trip.rating ? "text-yellow-400 fill-yellow-400" : "text-white/20"}`} />
-            </button>
-          ))}
-        </div>
-        {trip.rating > 0 && (
-          <>
-            <div className="mt-4 text-[10px] text-white/50">Destacar al conductor</div>
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {["👍 Amable","🚗 Buen manejo","🧼 Limpio","🕐 Puntual","🎵 Música","❄️ A/C"].map((t) => (
-                <span key={t} className="text-[10px] glass rounded-full px-2 py-1 cursor-pointer hover:bg-white/10">{t}</span>
-              ))}
-            </div>
-            <div className="mt-4 glass rounded-xl p-3">
-              <div className="text-[10px] text-white/60">💰 Dejar propina (100% al conductor)</div>
-              <div className="mt-2 flex gap-1.5">
-                {[10, 20, 30, 50].map((v) => (
-                  <button
-                    key={v}
-                    onClick={() => setTrip({ ...trip, tipAmount: v })}
-                    className={`flex-1 rounded-lg py-1.5 text-xs ${trip.tipAmount === v ? "bg-gradient-to-r from-neon-cyan to-neon-violet text-black font-bold" : "glass"}`}
-                  >
-                    ${v}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <button onClick={() => setTrip({ ...trip, status: "rated" })} className="mt-auto rounded-xl bg-gradient-to-r from-neon-cyan to-neon-violet py-3 text-black font-bold text-sm">Enviar y continuar</button>
-          </>
-        )}
-      </div>
-    );
-  }
-
-  // rated
-  return (
-    <div className="h-full flex flex-col items-center justify-center text-center pb-4">
-      <CheckCircle2 className="h-20 w-20 text-neon-lime" />
-      <div className="mt-3 font-display text-xl font-bold">¡Gracias Sofía!</div>
-      <div className="text-xs text-white/60">Viaje completado</div>
-      <div className="mt-4 w-full glass rounded-xl p-3 text-xs">
-        <div className="flex justify-between"><span className="text-white/60">Tarifa</span><span>${trip.fare}</span></div>
-        <div className="flex justify-between"><span className="text-white/60">Propina</span><span>${trip.tipAmount}</span></div>
-        <div className="flex justify-between border-t border-white/10 pt-1.5 mt-1.5 font-bold"><span>Total</span><span className="text-gradient">${trip.fare + trip.tipAmount}</span></div>
-      </div>
-      <div className="mt-3 flex items-center gap-2 text-[10px] text-neon-lime">
-        <Gift className="h-3 w-3" /> +{Math.round(trip.fare * 1.5)} puntos de lealtad
-      </div>
-      <button onClick={() => setTrip(initialTrip)} className="mt-5 text-xs text-neon-cyan underline">Pedir otro viaje</button>
-    </div>
-  );
-}
-
-function ServicePicker({ trip, setTrip }: { trip: TripState; setTrip: (u: TripState | ((t: TripState) => TripState)) => void }) {
-  const services: { key: Service; icon: any; name: string; mult: number }[] = [
-    { key: "ride", icon: Car, name: "Clásico", mult: 1 },
-    { key: "shared", icon: Users, name: "Compartido", mult: 0.62 },
-    { key: "envios", icon: Package, name: "Envíos", mult: 0.85 },
-    { key: "super", icon: ShoppingBasket, name: "Súper", mult: 1.25 },
-  ];
-
-  const base = Math.round(trip.fare);
-
-  const confirmTrip = () => {
-    setTrip({ ...trip, status: "searching" });
-    setTimeout(() => {
-      setTrip((t) => ({
-        ...t,
-        status: "matched",
-        driver: { name: "Don Roberto Mendoza", plate: "JAL-1234", vehicle: "Nissan Tsuru blanco", rating: 4.97, score: 98 },
-      }));
-    }, 2500);
-  };
-
-  return (
-    <div className="mt-3">
-      <div className="glass rounded-2xl p-3">
-        <div className="grid grid-cols-2 gap-1.5">
-          {services.map((s) => (
-            <button
-              key={s.key}
-              onClick={() => setTrip({ ...trip, service: s.key, fare: Math.round(base * s.mult) })}
-              className={`rounded-lg p-2.5 text-left flex items-center gap-2 text-xs ${trip.service === s.key ? "bg-neon-cyan/15 border border-neon-cyan/40" : "bg-white/[0.03] border border-white/5"}`}
-            >
-              <s.icon className="h-4 w-4 text-neon-cyan shrink-0" />
-              <span className="font-semibold flex-1">{s.name}</span>
-              <span className="text-neon-cyan font-bold">${Math.round(base * s.mult)}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-      <button
-        onClick={confirmTrip}
-        className="mt-3 w-full rounded-xl bg-neon-cyan py-3.5 text-black font-bold text-sm active:scale-95 transition"
-      >
-        Pedir viaje · ${trip.fare}
-      </button>
-    </div>
-  );
-}
-
-function PassengerHistory() {
-  const trips = [
-    { to: "Plaza del Sol", from: "Av. Chapultepec", fare: 68, date: "Hoy 14:30", rating: 5 },
-    { to: "Andares", from: "Providencia", fare: 95, date: "Ayer 19:15", rating: 5 },
-    { to: "Aeropuerto GDL", from: "Casa", fare: 280, date: "04 abr 06:00", rating: 5 },
-    { to: "Tlaquepaque", from: "Minerva", fare: 62, date: "03 abr 18:40", rating: 4 },
-    { to: "Farmacia Gdl", from: "Casa", fare: 45, date: "02 abr 22:10", rating: 5 },
-  ];
-  return (
-    <div className="h-full flex flex-col pb-4">
-      <div className="font-display text-lg font-bold">Tu historial</div>
-      <div className="text-[10px] text-white/60">28 viajes · $4,820 gastado · $1,108 ahorrado vs la competencia</div>
-      <div className="mt-3 space-y-2 overflow-y-auto flex-1">
-        {trips.map((t, i) => (
-          <div key={i} className="glass rounded-xl p-3">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <div className="text-xs font-semibold">{t.from} → {t.to}</div>
-                <div className="text-[10px] text-white/50 mt-0.5">{t.date}</div>
-                <div className="flex gap-0.5 mt-1">{Array.from({length:t.rating}).map((_,j)=><Star key={j} className="h-2 w-2 text-yellow-400 fill-yellow-400" />)}</div>
-              </div>
-              <div className="text-right">
-                <div className="font-display font-bold text-sm text-gradient">${t.fare}</div>
-              </div>
-            </div>
-          </div>
         ))}
       </div>
+      <div className="bg-white/5 rounded-2xl p-4 mb-4">
+        <div className="flex items-center justify-between mb-2"><span className="text-sm text-white/70">Tarifa estimada</span><span className="text-xl font-bold text-[#10b981]">${fare}</span></div>
+        <div className="text-[11px] text-white/50 mb-2">¿Ofrecer tu tarifa? (negociación)</div>
+        <div className="flex items-center gap-2">
+          <span className="text-white/40">$</span>
+          <input value={custom} onChange={e => setCustom(e.target.value.replace(/\D/g,""))} placeholder={String(fare)} className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#10b981]/50" />
+          {custom && <button onClick={() => setCustom("")}><X className="h-4 w-4 text-white/40" /></button>}
+        </div>
+        {custom && parseInt(custom) < fare*0.7 && <div className="text-[11px] text-yellow-400/80 mt-2 flex items-center gap-1"><AlertTriangle className="h-3 w-3" /> Tarifa baja</div>}
+      </div>
+      <div className="bg-white/5 rounded-2xl p-4 mb-6 flex items-center gap-3">
+        {pm?.type==="cash"?<Banknote className="h-5 w-5 text-[#10b981]" />:<CreditCard className="h-5 w-5 text-[#10b981]" />}
+        <div className="flex-1"><div className="text-sm">{pm?.label||"Efectivo"}</div><div className="text-[11px] text-white/50">Pago</div></div>
+      </div>
+      <button onClick={() => onRequestTrip(sel.addr, svc, fare, offered, pm?.label||"Efectivo")} className="w-full rounded-xl bg-[#10b981] py-4 text-black font-bold text-base active:scale-[0.98] transition">Solicitar viaje · ${offered}</button>
     </div>
   );
-}
 
-function PassengerProfile() {
   return (
-    <div className="h-full flex flex-col pb-4">
-      <div className="flex items-center gap-3">
-        <div className="h-14 w-14 rounded-full bg-gradient-to-br from-neon-pink to-neon-violet" />
-        <div>
-          <div className="font-display font-bold">Sofía Ramírez</div>
-          <div className="text-[10px] text-white/60">⭐ 4.9 · 28 viajes</div>
-        </div>
+    <div className="px-5 pt-4">
+      <div className="flex items-center justify-between mb-4">
+        <div><div className="text-white/60 text-xs">Hola,</div><div className="text-lg font-bold">{profile.name||"Usuario"} 👋</div></div>
+        <div className="h-9 w-9 rounded-full bg-white/5 flex items-center justify-center"><Bell className="h-4 w-4 text-white/60" /></div>
       </div>
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        <div className="glass rounded-xl p-3"><div className="text-[10px] text-white/50">Ahorrado</div><div className="text-lg font-bold text-gradient">$1,108</div></div>
-        <div className="glass rounded-xl p-3"><div className="text-[10px] text-white/50">Puntos</div><div className="text-lg font-bold text-neon-lime">3,420</div></div>
+      <div className="bg-white/5 rounded-2xl p-4 mb-4">
+        <div className="flex items-center gap-2 text-sm"><div className="h-2 w-2 rounded-full bg-[#10b981]" /><span className="text-white/70">Tu ubicación</span></div>
+        <div className="text-sm font-medium ml-4">{location?.address || <span className="text-white/40 flex items-center gap-1"><Loader2 className="h-3 w-3 animate-spin" /> Detectando...</span>}</div>
       </div>
-      <div className="mt-3 space-y-1.5 text-xs">
-        {[
-          { icon: CreditCard, t: "Métodos de pago", d: "3 métodos" },
-          { icon: Shield, t: "Seguridad", d: "Contactos: 3 · Palabra clave ✓" },
-          { icon: Heart, t: "Lugares favoritos", d: "Casa · Trabajo · Mamá" },
-          { icon: Bell, t: "Notificaciones", d: "Activadas" },
-          { icon: Settings, t: "Ajustes", d: "Idioma: Español" },
-          { icon: LogOut, t: "Cerrar sesión", d: "" },
-        ].map((r) => (
-          <div key={r.t} className="glass rounded-xl p-2.5 flex items-center gap-3">
-            <r.icon className="h-3.5 w-3.5 text-neon-cyan" />
-            <div className="flex-1">
-              <div className="font-semibold">{r.t}</div>
-              {r.d && <div className="text-[10px] text-white/50">{r.d}</div>}
-            </div>
-            <ChevronRight className="h-3 w-3 text-white/40" />
-          </div>
+      <div className="relative mb-4">
+        <MapPin className="absolute left-3 top-3.5 h-4 w-4 text-[#10b981]" />
+        <input value={dest} onChange={e => setDest(e.target.value)} placeholder="¿A dónde vamos?" className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-sm placeholder-white/30 focus:outline-none focus:border-[#10b981]/50" />
+      </div>
+      <div className="space-y-1.5">
+        {DESTS.filter(d => !dest || d.label.toLowerCase().includes(dest.toLowerCase())).map(d => (
+          <button key={d.label} onClick={() => setSel(d)} className="w-full text-left flex items-center gap-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] p-3">
+            <div className="h-8 w-8 rounded-full bg-white/5 flex items-center justify-center"><MapPin className="h-3.5 w-3.5 text-white/60" /></div>
+            <div className="flex-1"><div className="text-sm font-medium">{d.label}</div><div className="text-[11px] text-white/50">{d.km} km · ~{d.min} min</div></div>
+            <span className="text-sm font-semibold text-[#10b981]">${calculateFare(d.km,"normal")}</span>
+          </button>
         ))}
       </div>
+      <div className="mt-4 rounded-2xl overflow-hidden"><AnimatedMap progress={0} showCar={false} className="h-[180px]" /></div>
     </div>
   );
 }
 
-function SosModal({ onClose }: { onClose: () => void }) {
-  return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-red-950/90 backdrop-blur-sm flex flex-col items-center justify-center p-6 z-20">
-      <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ repeat: Infinity, duration: 1.2 }}>
-        <Siren className="h-20 w-20 text-red-400" />
-      </motion.div>
-      <div className="mt-4 font-display text-2xl font-bold text-red-300 text-center">SOS ACTIVADO</div>
-      <div className="mt-2 text-xs text-red-200/80 text-center">Alertando a C5 Jalisco y Policía Estatal</div>
-      <div className="mt-4 w-full glass rounded-xl p-3 text-[11px] space-y-1.5">
-        <div className="flex items-center gap-2"><CheckCircle2 className="h-3 w-3 text-neon-lime" /> Ubicación enviada</div>
-        <div className="flex items-center gap-2"><CheckCircle2 className="h-3 w-3 text-neon-lime" /> Foto del conductor enviada</div>
-        <div className="flex items-center gap-2"><CheckCircle2 className="h-3 w-3 text-neon-lime" /> Placas JAL-1234 enviadas</div>
-        <div className="flex items-center gap-2"><CheckCircle2 className="h-3 w-3 text-neon-lime" /> Contactos notificados (3)</div>
-        <div className="flex items-center gap-2"><CheckCircle2 className="h-3 w-3 text-neon-lime" /> Grabación de audio ON</div>
+interface TripState { status: "searching"|"negotiating"|"matched"|"arriving"|"inProgress"|"arrived"|"rating"; origin: string; destination: string; service: ServiceType; baseFare: number; offeredFare: number; paymentMethod: string; driver: DriverInfo|null; progress: number; }
+
+function ActiveTrip({ trip, setTrip, onComplete }: { trip: TripState; setTrip: (t: TripState|null) => void; onComplete: (r: TripRecord) => void }) {
+  const [rating, setRating] = useState(0);
+  const [tip, setTip] = useState(0);
+  const [sosOpen, setSosOpen] = useState(false);
+  const [counter, setCounter] = useState(0);
+
+  useEffect(() => {
+    if (trip.status==="searching") {
+      const t = setTimeout(() => {
+        const drv = getRandomDriver();
+        if (trip.offeredFare < trip.baseFare*0.85) { setCounter(Math.round(trip.baseFare*0.9)); setTrip({...trip, status:"negotiating", driver:drv}); }
+        else setTrip({...trip, status:"matched", driver:drv});
+      }, 3000);
+      return () => clearTimeout(t);
+    }
+  }, [trip.status]);
+
+  useEffect(() => { if(trip.status==="matched") { const t=setTimeout(()=>setTrip({...trip,status:"arriving"}),2000); return()=>clearTimeout(t); } }, [trip.status]);
+
+  useEffect(() => {
+    if (trip.status!=="inProgress") return;
+    const id = setInterval(() => {
+      if(trip.progress>=1) { clearInterval(id); setTrip({...trip,status:"arrived",progress:1}); return; }
+      setTrip({...trip, progress:trip.progress+0.015});
+    }, 300);
+    return () => clearInterval(id);
+  }, [trip.status, trip.progress]);
+
+  const ff = counter||trip.offeredFare;
+
+  if (trip.status==="searching") return (
+    <div className="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center p-6">
+      <motion.div animate={{scale:[1,1.1,1]}} transition={{repeat:Infinity,duration:2}} className="h-24 w-24 rounded-full bg-[#10b981]/20 border border-[#10b981]/30 flex items-center justify-center mb-6"><Radar className="h-10 w-10 text-[#10b981]" /></motion.div>
+      <div className="text-xl font-bold">Buscando conductor...</div>
+      <div className="text-sm text-white/60 mt-2">Enviando a conductores cercanos</div>
+      <div className="mt-6 bg-white/5 rounded-xl p-3 w-full max-w-sm text-xs space-y-1.5">
+        <div className="flex items-center gap-2"><MapPin className="h-3 w-3 text-[#10b981]" /> {trip.origin}</div>
+        <div className="flex items-center gap-2"><MapPin className="h-3 w-3 text-white/40" /> {trip.destination}</div>
+        <div className="flex items-center gap-2"><Wallet className="h-3 w-3 text-white/40" /> ${trip.offeredFare} · {trip.paymentMethod}</div>
       </div>
-      <div className="mt-4 text-xs text-red-300 text-center">Tiempo de respuesta C5: <b>4.2s</b></div>
-      <button onClick={onClose} className="mt-5 glass rounded-full px-5 py-2 text-xs">Cancelar alerta</button>
+      <button onClick={() => setTrip(null)} className="mt-6 text-sm text-red-400">Cancelar</button>
+    </div>
+  );
+
+  if (trip.status==="negotiating" && trip.driver) return (
+    <div className="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center p-6">
+      <div className="bg-white/5 rounded-2xl p-5 w-full max-w-sm">
+        <div className="text-xs text-[#10b981] font-semibold mb-3">CONTRAOFERTA</div>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-12 w-12 rounded-full bg-[#10b981]/20 flex items-center justify-center"><User className="h-6 w-6 text-[#10b981]" /></div>
+          <div><div className="font-bold">{trip.driver.name}</div><div className="text-xs text-white/60">{trip.driver.vehicle} · {trip.driver.plate}</div></div>
+        </div>
+        <div className="text-center mb-4">
+          <div className="text-white/60 text-sm">Ofreciste: <span className="line-through">${trip.offeredFare}</span></div>
+          <div className="text-2xl font-bold text-[#10b981] mt-1">Pide ${counter}</div>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={() => setTrip(null)} className="flex-1 rounded-xl bg-white/5 py-3 text-sm">Rechazar</button>
+          <button onClick={() => setTrip({...trip, status:"matched", offeredFare:counter})} className="flex-1 rounded-xl bg-[#10b981] py-3 text-black text-sm font-bold">Aceptar ${counter}</button>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (trip.status==="matched"||trip.status==="arriving") return (
+    <div className="fixed inset-0 bg-black z-50 flex flex-col">
+      <div className="px-5 pt-4 pb-2"><div className="text-xs text-[#10b981] font-semibold">{trip.status==="arriving"?"EN CAMINO":"ASIGNADO"}</div></div>
+      <div className="px-5 mb-3"><div className="bg-white/5 rounded-2xl p-4 flex items-center gap-3">
+        <div className="h-14 w-14 rounded-full bg-[#10b981]/20 flex items-center justify-center"><User className="h-7 w-7 text-[#10b981]" /></div>
+        <div className="flex-1">
+          <div className="flex items-center gap-1.5"><span className="font-bold">{trip.driver?.name}</span><BadgeCheck className="h-4 w-4 text-[#10b981]" /></div>
+          <div className="text-xs text-white/60"><Star className="h-3 w-3 text-yellow-400 fill-yellow-400 inline" /> {trip.driver?.rating} · {trip.driver?.trips} viajes</div>
+          <div className="text-xs text-white/50">{trip.driver?.vehicle} {trip.driver?.vehicleColor} · {trip.driver?.plate}</div>
+          <div className="text-[11px] text-white/40">{trip.driver?.siteNumber}</div>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <button className="h-9 w-9 rounded-full bg-white/5 flex items-center justify-center"><Phone className="h-4 w-4 text-[#10b981]" /></button>
+          <button className="h-9 w-9 rounded-full bg-white/5 flex items-center justify-center"><MessageCircle className="h-4 w-4 text-[#10b981]" /></button>
+        </div>
+      </div></div>
+      <div className="flex-1 px-5"><AnimatedMap progress={trip.status==="arriving"?0.15:0.05} showRoute className="h-full rounded-2xl" /></div>
+      <div className="px-5 py-4 space-y-2">
+        <div className="bg-white/5 rounded-xl p-3 flex items-center justify-between"><span className="text-sm">{trip.status==="arriving"?"Llega en ~3 min":"Preparando"}</span><span className="font-bold text-[#10b981]">${ff}</span></div>
+        <div className="flex gap-2">
+          <button onClick={() => setSosOpen(true)} className="flex-1 rounded-xl bg-red-500/10 border border-red-500/30 py-3 text-red-400 font-semibold text-sm flex items-center justify-center gap-2"><Siren className="h-4 w-4" /> SOS</button>
+          {trip.status==="arriving" && <button onClick={() => setTrip({...trip,status:"inProgress",progress:0})} className="flex-1 rounded-xl bg-[#10b981] py-3 text-black font-bold text-sm">Ya subí</button>}
+        </div>
+      </div>
+      {sosOpen && <SosOverlay onClose={() => setSosOpen(false)} driver={trip.driver!} />}
+    </div>
+  );
+
+  if (trip.status==="inProgress") {
+    const eta = Math.max(1,Math.round(18*(1-trip.progress)));
+    return (
+      <div className="fixed inset-0 bg-black z-50 flex flex-col">
+        <div className="px-5 pt-4 pb-2 flex items-center justify-between">
+          <div><div className="text-xs text-white/60">En camino a</div><div className="font-bold">{trip.destination}</div></div>
+          <div className="text-right"><div className="text-xs text-white/50">ETA</div><div className="text-lg font-bold text-[#10b981]">{eta} min</div></div>
+        </div>
+        <div className="flex-1 px-5"><AnimatedMap progress={trip.progress} sosActive={sosOpen} className="h-full rounded-2xl" /></div>
+        <div className="px-5 py-3 space-y-2">
+          <div className="bg-white/5 rounded-xl p-3 flex items-center justify-between text-sm"><div className="flex items-center gap-2"><Shield className="h-4 w-4 text-[#10b981]" /> Monitoreado</div><span className="text-[#10b981] text-xs">IA activa</span></div>
+          <div className="flex gap-2">
+            <button onClick={() => setSosOpen(true)} className="flex-1 rounded-xl bg-red-500/10 border border-red-500/30 py-3 text-red-400 font-semibold text-sm flex items-center justify-center gap-2"><Siren className="h-4 w-4" /> SOS</button>
+            <button className="flex-1 rounded-xl bg-white/5 py-3 text-sm font-semibold flex items-center justify-center gap-1"><Users className="h-4 w-4" /> Compartir</button>
+          </div>
+        </div>
+        {sosOpen && <SosOverlay onClose={() => setSosOpen(false)} driver={trip.driver!} />}
+      </div>
+    );
+  }
+
+  if (trip.status==="arrived") return (
+    <div className="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center p-6">
+      <CheckCircle2 className="h-20 w-20 text-[#10b981] mb-4" />
+      <div className="text-2xl font-bold">¡Llegaste!</div>
+      <div className="text-sm text-white/60 mt-1">{trip.destination}</div>
+      <div className="mt-6 bg-white/5 rounded-2xl p-4 w-full max-w-sm text-sm">
+        <div className="flex justify-between"><span className="text-white/60">Tarifa</span><span>${ff}</span></div>
+        <div className="flex justify-between mt-1"><span className="text-white/60">Método</span><span>{trip.paymentMethod}</span></div>
+      </div>
+      <button onClick={() => setTrip({...trip,status:"rating"})} className="mt-6 w-full max-w-sm rounded-xl bg-[#10b981] py-3.5 text-black font-bold">Calificar</button>
+    </div>
+  );
+
+  return (
+    <div className="fixed inset-0 bg-black z-50 overflow-y-auto p-6">
+      <div className="max-w-sm mx-auto text-center">
+        <div className="h-16 w-16 rounded-full bg-[#10b981]/20 flex items-center justify-center mx-auto"><User className="h-8 w-8 text-[#10b981]" /></div>
+        <div className="mt-3 font-bold text-lg">{trip.driver?.name}</div>
+        <div className="text-xs text-white/60">{trip.driver?.vehicle} · {trip.driver?.plate}</div>
+        <div className="mt-6 text-sm text-white/70 mb-2">¿Cómo estuvo?</div>
+        <div className="flex justify-center gap-2">
+          {[1,2,3,4,5].map(i => <button key={i} onClick={() => setRating(i)}><Star className={`h-10 w-10 ${i<=rating?"text-yellow-400 fill-yellow-400":"text-white/20"}`} /></button>)}
+        </div>
+        {rating>0 && <>
+          <div className="mt-6 text-left"><div className="text-xs text-white/60 mb-2">Propina (100% conductor)</div>
+            <div className="flex gap-2">{[0,10,20,30,50].map(v => <button key={v} onClick={() => setTip(v)} className={`flex-1 rounded-lg py-2.5 text-sm ${tip===v?"bg-[#10b981] text-black font-bold":"bg-white/5"}`}>{v===0?"—":`$${v}`}</button>)}</div>
+          </div>
+          <button onClick={() => onComplete({ id:`t-${Date.now()}`, date:new Date().toISOString(), origin:trip.origin, destination:trip.destination, service:trip.service, fare:ff, distance:8.4, duration:18, driver:trip.driver!, rating, driverRatingToUser:Math.random()>0.2?5:4, tip, paymentMethod:trip.paymentMethod, status:"completed" })} className="mt-6 w-full rounded-xl bg-[#10b981] py-3.5 text-black font-bold">Enviar</button>
+        </>}
+      </div>
+    </div>
+  );
+}
+
+function SosOverlay({ onClose, driver }: { onClose: () => void; driver: DriverInfo }) {
+  return (
+    <motion.div initial={{opacity:0}} animate={{opacity:1}} className="fixed inset-0 bg-red-950/95 z-[60] flex flex-col items-center justify-center p-6">
+      <motion.div animate={{scale:[1,1.1,1]}} transition={{repeat:Infinity,duration:1}}><Siren className="h-20 w-20 text-red-400" /></motion.div>
+      <div className="mt-4 text-2xl font-bold text-red-300">SOS ACTIVADO</div>
+      <div className="mt-4 bg-white/5 rounded-xl p-3 w-full max-w-sm text-sm space-y-1.5">
+        <div className="flex items-center gap-2"><CheckCircle2 className="h-3.5 w-3.5 text-green-400" /> Ubicación enviada al C5</div>
+        <div className="flex items-center gap-2"><CheckCircle2 className="h-3.5 w-3.5 text-green-400" /> {driver.name} · {driver.plate}</div>
+        <div className="flex items-center gap-2"><CheckCircle2 className="h-3.5 w-3.5 text-green-400" /> Contactos notificados</div>
+        <div className="flex items-center gap-2"><CheckCircle2 className="h-3.5 w-3.5 text-green-400" /> Audio grabando</div>
+      </div>
+      <button onClick={onClose} className="mt-6 rounded-full bg-white/10 px-6 py-2 text-sm">Cancelar (falsa alarma)</button>
     </motion.div>
   );
 }
 
-/* =========================  DRIVER APP  ========================= */
-
-function DriverApp({ trip, setTrip }: { trip: TripState; setTrip: (u: TripState | ((t: TripState) => TripState)) => void }) {
-  const [online, setOnline] = useState(true);
-  const [tab, setTab] = useState<"home" | "earnings" | "profile">("home");
-
-  const bottomNav = (
-    <div className="flex items-center justify-around py-3 px-2">
-      <button onClick={() => setTab("home")} className={`flex flex-col items-center gap-0.5 ${tab === "home" ? "text-neon-lime" : "text-white/50"}`}><Home className="h-4 w-4" /><span className="text-[10px]">Inicio</span></button>
-      <button onClick={() => setTab("earnings")} className={`flex flex-col items-center gap-0.5 ${tab === "earnings" ? "text-neon-lime" : "text-white/50"}`}><Wallet className="h-4 w-4" /><span className="text-[10px]">Ganancias</span></button>
-      <button onClick={() => setTab("profile")} className={`flex flex-col items-center gap-0.5 ${tab === "profile" ? "text-neon-lime" : "text-white/50"}`}><User className="h-4 w-4" /><span className="text-[10px]">Perfil</span></button>
+function TripsScreen({ trips }: { trips: TripRecord[] }) {
+  const [sel, setSel] = useState<TripRecord|null>(null);
+  if (sel) return (
+    <div className="px-5 pt-4">
+      <button onClick={() => setSel(null)} className="flex items-center gap-1 text-white/60 text-sm mb-4"><ChevronLeft className="h-4 w-4" /> Historial</button>
+      <div className="bg-white/5 rounded-2xl p-5">
+        <div className="text-xs text-[#10b981]">{sel.service.toUpperCase()}</div>
+        <div className="font-bold text-lg mt-1">{sel.origin}</div>
+        <div className="text-white/60 text-sm">→ {sel.destination}</div>
+        <div className="mt-4 grid grid-cols-3 gap-3 text-center text-sm">
+          <div className="bg-white/5 rounded-xl p-3"><div className="text-[11px] text-white/50">Km</div><div className="font-bold">{sel.distance}</div></div>
+          <div className="bg-white/5 rounded-xl p-3"><div className="text-[11px] text-white/50">Min</div><div className="font-bold">{sel.duration}</div></div>
+          <div className="bg-white/5 rounded-xl p-3"><div className="text-[11px] text-white/50">Total</div><div className="font-bold text-[#10b981]">${sel.fare+sel.tip}</div></div>
+        </div>
+        <div className="mt-4 bg-white/5 rounded-xl p-3">
+          <div className="font-semibold">{sel.driver.name}</div>
+          <div className="text-xs text-white/50">{sel.driver.vehicle} · {sel.driver.plate} · {sel.driver.siteNumber}</div>
+          <div className="text-xs mt-1"><Star className="h-3 w-3 text-yellow-400 fill-yellow-400 inline" /> {sel.rating}/5</div>
+          {sel.driverRatingToUser && <div className="text-xs text-white/50">Te calificó: {sel.driverRatingToUser}/5</div>}
+        </div>
+        <div className="mt-3 text-sm text-white/60">Pago: {sel.paymentMethod}{sel.tip>0&&` · Propina $${sel.tip}`}</div>
+        <button className="mt-4 w-full rounded-xl bg-white/5 py-3 text-sm font-semibold flex items-center justify-center gap-2"><Receipt className="h-4 w-4" /> Descargar factura</button>
+      </div>
     </div>
   );
-
   return (
-    <PhoneFrame nav={bottomNav}>
-      <div className="flex flex-col px-5 pb-4">
-        {tab === "home" && <DriverHome trip={trip} setTrip={setTrip} online={online} setOnline={setOnline} />}
-        {tab === "earnings" && <DriverEarnings />}
-        {tab === "profile" && <DriverProfile />}
-      </div>
-    </PhoneFrame>
-  );
-}
-
-function DriverHome({ trip, setTrip, online, setOnline }: { trip: TripState; setTrip: (u: TripState | ((t: TripState) => TripState)) => void; online: boolean; setOnline: (v: boolean) => void }) {
-  // Driver sees notification when passenger status is "searching"
-  const hasRequest = trip.status === "searching";
-
-  if (trip.status === "idle" || trip.status === "selecting" || trip.status === "requesting") {
-    return (
-      <div className="h-full flex flex-col pb-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-xs text-white/60">Don Roberto</div>
-            <div className="font-display text-lg font-bold">{online ? "En línea 🟢" : "Offline"}</div>
+    <div className="px-5 pt-4">
+      <div className="text-lg font-bold mb-1">Historial</div>
+      <div className="text-xs text-white/60 mb-4">{trips.length} viajes · ${trips.reduce((s,t) => s+t.fare,0)} total</div>
+      <div className="space-y-2">{trips.map(t => (
+        <button key={t.id} onClick={() => setSel(t)} className="w-full text-left bg-white/[0.03] hover:bg-white/[0.06] rounded-xl p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex-1"><div className="text-sm font-medium truncate">{t.destination}</div><div className="text-[11px] text-white/50">{t.driver.name} · {new Date(t.date).toLocaleDateString("es-MX")}</div></div>
+            <div className="text-right ml-3"><div className="font-bold text-[#10b981]">${t.fare}</div><div className="flex gap-0.5 justify-end mt-0.5">{Array.from({length:t.rating}).map((_,i) => <Star key={i} className="h-2.5 w-2.5 text-yellow-400 fill-yellow-400" />)}</div></div>
           </div>
-          <button onClick={() => setOnline(!online)} className={`h-8 w-14 rounded-full p-0.5 transition ${online ? "bg-neon-lime" : "bg-white/20"}`}>
-            <div className={`h-7 w-7 rounded-full bg-white transition ${online ? "translate-x-6" : ""}`} />
-          </button>
-        </div>
-
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          <div className="glass rounded-xl p-3"><div className="text-[10px] text-white/50">Hoy</div><div className="text-lg font-bold text-neon-lime">$842</div></div>
-          <div className="glass rounded-xl p-3"><div className="text-[10px] text-white/50">Viajes hoy</div><div className="text-lg font-bold">11</div></div>
-        </div>
-
-        <div className="mt-3"><GdlMap car={false} showRoute={false} /></div>
-
-        <div className="mt-auto glass rounded-xl p-3 text-center">
-          <div className="text-[10px] text-white/60">Esperando solicitudes…</div>
-          <div className="text-[10px] text-white/40 mt-1">Las solicitudes aparecerán aquí cuando un pasajero pida un viaje en tu zona</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (hasRequest) {
-    return (
-      <div className="h-full flex flex-col pb-4">
-        <div className="text-xs text-white/60">En línea 🟢</div>
-        <div className="mt-2"><GdlMap progress={0.1} /></div>
-        <motion.div
-          initial={{ y: 30, opacity: 0, scale: 0.95 }}
-          animate={{ y: 0, opacity: 1, scale: 1 }}
-          className="mt-3 glass rounded-2xl p-4 border-2 border-neon-lime/60 bg-neon-lime/5"
-        >
-          <div className="flex items-center gap-2">
-            <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1 }} className="h-2 w-2 rounded-full bg-neon-lime" />
-            <div className="text-[10px] text-neon-lime font-bold uppercase tracking-wider">Nueva solicitud</div>
-          </div>
-          <div className="mt-2 flex items-center gap-2">
-            <div className="h-9 w-9 rounded-full bg-gradient-to-br from-neon-pink to-neon-violet" />
-            <div>
-              <div className="font-bold text-sm">Sofía R.</div>
-              <div className="text-[10px] text-white/60">⭐ 4.9 · 28 viajes · verificada</div>
-            </div>
-          </div>
-          <div className="mt-3 space-y-1 text-[10px]">
-            <div className="flex items-center gap-2"><MapPin className="h-3 w-3 text-neon-pink" /> {trip.origin}</div>
-            <div className="flex items-center gap-2"><MapPin className="h-3 w-3 text-neon-lime" /> {trip.destination}</div>
-            <div className="flex items-center gap-2 text-white/50"><Clock className="h-3 w-3" /> {trip.distance} km · {trip.duration} min</div>
-          </div>
-          <div className="mt-3 flex items-center justify-between">
-            <div>
-              <div className="text-[10px] text-white/50">Ganas (90%)</div>
-              <div className="font-display text-2xl font-bold text-gradient">${Math.round(trip.fare * 0.9)}</div>
-            </div>
-            <div className="flex gap-1.5">
-              <button onClick={() => setTrip(initialTrip)} className="glass rounded-lg px-3 py-2 text-[10px]">Rechazar</button>
-              <button
-                onClick={() => {
-                  setTrip({
-                    ...trip,
-                    status: "matched",
-                    driver: { name: "Don Roberto Mendoza", plate: "JAL-1234", vehicle: "Nissan Tsuru blanco", rating: 4.97, score: 98 },
-                  });
-                }}
-                className="rounded-lg bg-gradient-to-r from-neon-lime to-neon-cyan px-4 py-2 text-[11px] text-black font-bold"
-              >
-                Aceptar
-              </button>
-            </div>
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
-
-  if (trip.status === "matched" || trip.status === "arriving") {
-    return (
-      <div className="h-full flex flex-col pb-4">
-        <div className="text-[10px] text-white/60">Recoger a</div>
-        <div className="font-display text-base font-bold">Sofía R. ⭐ 4.9</div>
-        <div className="mt-2"><GdlMap progress={trip.carProgress} /></div>
-        <div className="mt-3 glass rounded-xl p-3">
-          <div className="flex items-center gap-2 text-xs">
-            <MapPin className="h-3 w-3 text-neon-pink" />
-            <span className="flex-1">{trip.origin}</span>
-          </div>
-          <div className="text-[10px] text-white/50 mt-1">Llegando en 2 min · 1.2 km</div>
-        </div>
-        <div className="mt-3 flex gap-1.5">
-          <button className="flex-1 glass rounded-lg py-2 text-[10px] font-semibold flex items-center justify-center gap-1"><Navigation className="h-3 w-3" /> Navegar</button>
-          <button className="flex-1 glass rounded-lg py-2 text-[10px] font-semibold flex items-center justify-center gap-1"><Phone className="h-3 w-3" /> Llamar</button>
-          <button className="flex-1 glass rounded-lg py-2 text-[10px] font-semibold flex items-center justify-center gap-1"><MessageCircle className="h-3 w-3" /> Chat</button>
-        </div>
-        <button
-          onClick={() => setTrip({ ...trip, status: "arriving" })}
-          disabled={trip.status === "arriving"}
-          className="mt-auto rounded-xl glass py-3 text-sm font-semibold hover:bg-white/10 disabled:opacity-50"
-        >
-          Ya llegué al punto
         </button>
-        {trip.status === "arriving" && (
-          <button
-            onClick={() => setTrip({ ...trip, status: "pickedup", carProgress: 0 })}
-            className="mt-2 rounded-xl bg-gradient-to-r from-neon-lime to-neon-cyan py-3 text-black font-bold text-sm"
-          >
-            Iniciar viaje (confirmar identidad)
-          </button>
-        )}
-      </div>
-    );
-  }
-
-  if (trip.status === "pickedup" || trip.status === "onroute") {
-    return (
-      <div className="h-full flex flex-col pb-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-[10px] text-white/60">Llevando a Sofía a</div>
-            <div className="font-display text-sm font-bold">{trip.destination}</div>
-          </div>
-          <div className="text-right">
-            <div className="text-[10px] text-white/50">ETA</div>
-            <div className="font-bold text-sm text-neon-lime">{Math.max(1, Math.round(trip.duration * (1 - trip.carProgress)))} min</div>
-          </div>
-        </div>
-        <div className="mt-2"><GdlMap progress={Math.max(0.2, trip.carProgress)} /></div>
-        <div className="mt-3 grid grid-cols-3 gap-1.5 text-center">
-          <div className="glass rounded-lg p-1.5"><div className="text-[11px] text-white/50">Distancia</div><div className="text-xs font-bold">{(trip.distance * (1 - trip.carProgress)).toFixed(1)} km</div></div>
-          <div className="glass rounded-lg p-1.5"><div className="text-[11px] text-white/50">Ganas</div><div className="text-xs font-bold text-neon-lime">${Math.round(trip.fare * 0.9)}</div></div>
-          <div className="glass rounded-lg p-1.5"><div className="text-[11px] text-white/50">Com.</div><div className="text-xs font-bold text-white/60">${Math.round(trip.fare * 0.1)}</div></div>
-        </div>
-        <div className="mt-2 glass rounded-lg p-2 text-[11px] text-center text-white/60">🛡️ Protección activa · Ruta monitoreada por IA</div>
-        {trip.status === "pickedup" && (
-          <button
-            onClick={() => setTrip({ ...trip, status: "onroute" })}
-            className="mt-auto rounded-xl bg-gradient-to-r from-neon-lime to-neon-cyan py-3 text-black font-bold text-sm"
-          >
-            Comenzar trayecto
-          </button>
-        )}
-        {trip.status === "onroute" && (
-          <div className="mt-auto text-[10px] text-center text-white/50">Viaje en progreso… llegando en {Math.max(1, Math.round(trip.duration * (1 - trip.carProgress)))} min</div>
-        )}
-      </div>
-    );
-  }
-
-  if (trip.status === "arrived" || trip.status === "paid" || trip.status === "rated") {
-    return (
-      <div className="h-full flex flex-col pb-4 items-center justify-center text-center">
-        <CheckCircle2 className="h-16 w-16 text-neon-lime" />
-        <div className="mt-3 font-display text-lg font-bold">¡Viaje completado!</div>
-        <div className="mt-4 w-full glass rounded-xl p-4">
-          <div className="text-[10px] text-white/60">Ganancias</div>
-          <div className="font-display text-2xl font-bold text-gradient">${Math.round(trip.fare * 0.9)}</div>
-          <div className="text-[10px] text-white/50">90% de ${trip.fare}</div>
-          {trip.tipAmount > 0 && (
-            <div className="mt-2 pt-2 border-t border-white/10">
-              <div className="text-[10px] text-neon-lime">+ Propina (100% tuya)</div>
-              <div className="font-bold text-neon-lime">+${trip.tipAmount}</div>
-            </div>
-          )}
-          <div className="mt-2 text-[11px] text-neon-lime">💰 En la competencia hubieras recibido ${Math.round(trip.fare * 0.7)}</div>
-        </div>
-        <div className="mt-3 text-[10px] text-white/50">Pago a BBVA •••• 4821 en 24h</div>
-      </div>
-    );
-  }
-
-  return null;
+      ))}</div>
+    </div>
+  );
 }
 
-function DriverEarnings() {
+function ProfileScreen({ profile, trips, onEdit, onPay, onHelp }: { profile: UserProfile; trips: TripRecord[]; onEdit: () => void; onPay: () => void; onHelp: () => void }) {
   return (
-    <div className="h-full flex flex-col pb-4">
-      <div className="font-display text-lg font-bold">Ganancias</div>
-      <div className="text-[10px] text-white/60">Pago automático diario a BBVA</div>
-      <div className="mt-3 glass rounded-2xl p-4 bg-gradient-to-br from-neon-lime/10 to-transparent border-neon-lime/30">
-        <div className="text-[10px] text-white/60">Esta semana</div>
-        <div className="font-display text-3xl font-bold text-gradient">$5,428</div>
-        <div className="text-[10px] text-neon-lime">+$1,230 vs la competencia</div>
+    <div className="px-5 pt-4">
+      <div className="flex items-center gap-4 mb-6">
+        <div className="h-16 w-16 rounded-full bg-[#10b981]/20 flex items-center justify-center"><User className="h-8 w-8 text-[#10b981]" /></div>
+        <div><div className="font-bold text-lg">{profile.name}</div><div className="text-xs text-white/60">{profile.phone||"Sin tel."} · {profile.email||"Sin correo"}</div></div>
       </div>
-      <div className="mt-3 grid grid-cols-2 gap-2">
-        <div className="glass rounded-xl p-3"><div className="text-[10px] text-white/50">Hoy</div><div className="font-bold">$842</div></div>
-        <div className="glass rounded-xl p-3"><div className="text-[10px] text-white/50">Viajes</div><div className="font-bold">11</div></div>
-        <div className="glass rounded-xl p-3"><div className="text-[10px] text-white/50">Propinas</div><div className="font-bold text-neon-lime">$180</div></div>
-        <div className="glass rounded-xl p-3"><div className="text-[10px] text-white/50">Horas</div><div className="font-bold">8.2</div></div>
+      <div className="grid grid-cols-3 gap-2 mb-6">
+        <div className="bg-white/5 rounded-xl p-3 text-center"><div className="text-[11px] text-white/50">Viajes</div><div className="font-bold text-lg">{trips.length}</div></div>
+        <div className="bg-white/5 rounded-xl p-3 text-center"><div className="text-[11px] text-white/50">Gastado</div><div className="font-bold text-lg">${trips.reduce((s,t)=>s+t.fare,0)}</div></div>
+        <div className="bg-white/5 rounded-xl p-3 text-center"><div className="text-[11px] text-white/50">Rating</div><div className="font-bold text-lg">4.9⭐</div></div>
       </div>
-      <div className="mt-3 glass rounded-xl p-3">
-        <div className="text-xs font-semibold mb-2">Adelanto de ganancias</div>
-        <div className="text-[10px] text-white/60 mb-2">Tienes $842 disponibles. Puedes adelantar sin intereses (3 al mes).</div>
-        <button className="w-full rounded-lg bg-gradient-to-r from-neon-lime to-neon-cyan py-2 text-black font-bold text-xs">Solicitar adelanto</button>
+      <div className="space-y-1">
+        {([[Edit3,"Editar perfil",onEdit],[CreditCard,"Métodos de pago",onPay],[Shield,"Seguridad",()=>{}],[HelpCircle,"Soporte",onHelp],[Receipt,"Facturación",()=>{}],[Settings,"Configuración",()=>{}]] as const).map(([I,l,fn],i) => (
+          <button key={i} onClick={fn as any} className="w-full flex items-center gap-3 rounded-xl p-3.5 hover:bg-white/5">
+            <I className="h-4 w-4 text-white/60" /><span className="flex-1 text-left text-sm">{l}</span><ChevronRight className="h-4 w-4 text-white/30" />
+          </button>
+        ))}
       </div>
     </div>
   );
 }
 
-function DriverProfile() {
+function EditProfileScreen({ profile, onSave, onBack }: { profile: UserProfile; onSave: (p: UserProfile) => void; onBack: () => void }) {
+  const [name, setName] = useState(profile.name);
+  const [phone, setPhone] = useState(profile.phone);
+  const [email, setEmail] = useState(profile.email);
+  const [contacts, setContacts] = useState(profile.emergencyContacts);
   return (
-    <div className="h-full flex flex-col pb-4">
-      <div className="flex items-center gap-3">
-        <div className="h-14 w-14 rounded-full bg-gradient-to-br from-neon-lime to-neon-cyan" />
-        <div>
-          <div className="font-display font-bold">Don Roberto M.</div>
-          <div className="text-[10px] text-white/60">⭐ 4.97 · 1,284 viajes</div>
+    <div className="px-5 pt-4">
+      <button onClick={onBack} className="flex items-center gap-1 text-white/60 text-sm mb-4"><ChevronLeft className="h-4 w-4" /> Perfil</button>
+      <div className="text-lg font-bold mb-4">Editar perfil</div>
+      <div className="space-y-3">
+        <div><label className="text-xs text-white/60">Nombre</label><input value={name} onChange={e => setName(e.target.value)} className="w-full mt-1 rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm focus:outline-none focus:border-[#10b981]/50" /></div>
+        <div><label className="text-xs text-white/60">Teléfono</label><input value={phone} onChange={e => setPhone(e.target.value)} className="w-full mt-1 rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm focus:outline-none focus:border-[#10b981]/50" /></div>
+        <div><label className="text-xs text-white/60">Correo</label><input value={email} onChange={e => setEmail(e.target.value)} type="email" className="w-full mt-1 rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm focus:outline-none focus:border-[#10b981]/50" /></div>
+      </div>
+      <div className="mt-6 flex items-center justify-between mb-2"><div className="text-sm font-semibold">Contactos de emergencia</div><button onClick={() => setContacts([...contacts,{name:"",phone:""}])} className="text-[#10b981] text-xs flex items-center gap-1"><Plus className="h-3 w-3" /> Agregar</button></div>
+      {contacts.map((c,i) => (
+        <div key={i} className="flex gap-2 mb-2">
+          <input value={c.name} onChange={e => { const n=[...contacts]; n[i].name=e.target.value; setContacts(n); }} placeholder="Nombre" className="flex-1 rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm focus:outline-none" />
+          <input value={c.phone} onChange={e => { const n=[...contacts]; n[i].phone=e.target.value; setContacts(n); }} placeholder="Tel" className="flex-1 rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-sm focus:outline-none" />
+          <button onClick={() => setContacts(contacts.filter((_,j) => j!==i))} className="text-red-400/60"><Trash2 className="h-4 w-4" /></button>
         </div>
-      </div>
-      <div className="mt-3 grid grid-cols-2 gap-2">
-        <div className="glass rounded-xl p-3"><div className="text-[10px] text-white/50">Score seguridad</div><div className="text-lg font-bold text-neon-cyan">98</div></div>
-        <div className="glass rounded-xl p-3"><div className="text-[10px] text-white/50">Estado</div><div className="text-xs font-bold text-neon-lime">Verificado ✓</div></div>
-      </div>
-      <div className="mt-3 space-y-1.5 text-xs">
-        {[
-          { icon: BadgeCheck, t: "Documentación", d: "7/7 filtros OK" },
-          { icon: Car, t: "Vehículo", d: "Nissan Tsuru 2018 · JAL-1234" },
-          { icon: Shield, t: "Seguro + póliza", d: "Vigente hasta 2026" },
-          { icon: Fingerprint, t: "Biometría", d: "Activa en cada turno" },
-          { icon: Wallet, t: "Cuenta bancaria", d: "BBVA •••• 4821" },
-          { icon: Settings, t: "Preferencias", d: "Zona: Providencia/Zapopan" },
-        ].map((r) => (
-          <div key={r.t} className="glass rounded-xl p-2.5 flex items-center gap-3">
-            <r.icon className="h-3.5 w-3.5 text-neon-lime" />
-            <div className="flex-1">
-              <div className="font-semibold">{r.t}</div>
-              <div className="text-[10px] text-white/50">{r.d}</div>
+      ))}
+      <button onClick={() => onSave({...profile, name, phone, email, emergencyContacts:contacts})} className="mt-6 w-full rounded-xl bg-[#10b981] py-3.5 text-black font-bold">Guardar</button>
+    </div>
+  );
+}
+
+function PaymentsScreen({ payments, onUpdate, onBack }: { payments: PaymentMethod[]; onUpdate: (p: PaymentMethod[]) => void; onBack: () => void }) {
+  const [adding, setAdding] = useState(false);
+  const [nt, setNt] = useState<"card"|"transfer">("card");
+  const [nl, setNl] = useState("");
+  const [n4, setN4] = useState("");
+  return (
+    <div className="px-5 pt-4">
+      <button onClick={onBack} className="flex items-center gap-1 text-white/60 text-sm mb-4"><ChevronLeft className="h-4 w-4" /> Inicio</button>
+      <div className="text-lg font-bold mb-4">Métodos de pago</div>
+      <div className="space-y-2">
+        {payments.map(p => (
+          <div key={p.id} className={`flex items-center gap-3 rounded-xl p-4 ${p.isDefault?"bg-[#10b981]/10 border border-[#10b981]/30":"bg-white/5"}`}>
+            {p.type==="cash"?<Banknote className="h-5 w-5 text-[#10b981]" />:p.type==="card"?<CreditCard className="h-5 w-5 text-[#10b981]" />:<Smartphone className="h-5 w-5 text-[#10b981]" />}
+            <div className="flex-1"><div className="text-sm">{p.label}</div>{p.last4 && <div className="text-[11px] text-white/50">•••• {p.last4}</div>}</div>
+            <div className="flex items-center gap-2">
+              {!p.isDefault && <button onClick={() => onUpdate(payments.map(x => ({...x, isDefault:x.id===p.id})))} className="text-[11px] text-[#10b981]">Usar</button>}
+              {p.isDefault && <span className="text-[10px] bg-[#10b981]/20 text-[#10b981] rounded-full px-2 py-0.5">Default</span>}
+              {p.id!=="cash" && <button onClick={() => onUpdate(payments.filter(x => x.id!==p.id))} className="text-red-400/60"><Trash2 className="h-3.5 w-3.5" /></button>}
             </div>
           </div>
         ))}
+      </div>
+      {!adding ? (
+        <button onClick={() => setAdding(true)} className="mt-4 w-full rounded-xl border border-dashed border-white/20 py-3 text-sm text-white/60 flex items-center justify-center gap-2"><Plus className="h-4 w-4" /> Agregar</button>
+      ) : (
+        <div className="mt-4 bg-white/5 rounded-xl p-4 space-y-3">
+          <div className="flex gap-2">
+            <button onClick={() => setNt("card")} className={`flex-1 rounded-lg py-2 text-xs ${nt==="card"?"bg-[#10b981] text-black font-bold":"bg-white/5"}`}>Tarjeta</button>
+            <button onClick={() => setNt("transfer")} className={`flex-1 rounded-lg py-2 text-xs ${nt==="transfer"?"bg-[#10b981] text-black font-bold":"bg-white/5"}`}>Transferencia</button>
+          </div>
+          <input value={nl} onChange={e => setNl(e.target.value)} placeholder={nt==="card"?"Nombre en tarjeta":"Banco"} className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2.5 text-sm focus:outline-none" />
+          {nt==="card" && <input value={n4} onChange={e => setN4(e.target.value.replace(/\D/g,"").slice(0,4))} placeholder="Últimos 4" className="w-full rounded-lg bg-white/5 border border-white/10 px-3 py-2.5 text-sm focus:outline-none" />}
+          <div className="flex gap-2">
+            <button onClick={() => setAdding(false)} className="flex-1 rounded-lg bg-white/5 py-2.5 text-sm">Cancelar</button>
+            <button onClick={() => { if(nl.trim()) { onUpdate([...payments,{id:`pm-${Date.now()}`,type:nt,label:nl.trim(),last4:n4||undefined,isDefault:false}]); setAdding(false); setNl(""); setN4(""); }}} className="flex-1 rounded-lg bg-[#10b981] py-2.5 text-black text-sm font-bold">Agregar</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SupportScreen({ onBack }: { onBack: () => void }) {
+  return (
+    <div className="px-5 pt-4">
+      <button onClick={onBack} className="flex items-center gap-1 text-white/60 text-sm mb-4"><ChevronLeft className="h-4 w-4" /> Inicio</button>
+      <div className="text-lg font-bold mb-4">Soporte y ayuda</div>
+      <div className="space-y-3">
+        {[
+          ["¿Cómo solicito un viaje?","Elige destino, tipo de servicio, ajusta tarifa y presiona Solicitar."],
+          ["¿Cómo funciona la negociación?","Ofrece tu tarifa. El conductor puede aceptar o contraoferta."],
+          ["¿Qué hago en emergencia?","Presiona SOS. Tu ubicación y datos se envían al C5 en 5 segundos."],
+          ["¿Los conductores están verificados?","Sí. 7 filtros: INE, antecedentes, médico, psicométrico, licencia, vehículo, conducción."],
+          ["¿Puedo pedir factura?","Sí, en el detalle de cada viaje."],
+        ].map(([q,a],i) => (
+          <details key={i} className="bg-white/5 rounded-xl">
+            <summary className="p-4 text-sm font-medium cursor-pointer list-none flex items-center justify-between">{q}<ChevronRight className="h-4 w-4 text-white/30" /></summary>
+            <div className="px-4 pb-4 text-sm text-white/70">{a}</div>
+          </details>
+        ))}
+      </div>
+      <div className="mt-6 bg-white/5 rounded-xl p-4 text-center">
+        <div className="text-sm font-semibold">¿Más ayuda?</div>
+        <button className="mt-3 rounded-xl bg-[#10b981] px-5 py-2.5 text-black text-sm font-bold flex items-center gap-2 mx-auto"><Send className="h-4 w-4" /> WhatsApp</button>
       </div>
     </div>
   );
