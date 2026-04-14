@@ -41,7 +41,8 @@ export default function PassengerApp() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-neutral-950 flex justify-center">
+    <div className="w-full max-w-[430px] min-h-screen bg-black text-white relative shadow-2xl shadow-black/50">
       <div className="bg-black px-5 pt-3 pb-1 flex items-center justify-between text-[11px] text-white/60">
         <span>{new Date().toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}</span>
         <span className="font-semibold text-white text-xs">Mi Taxi Jalisco</span>
@@ -60,7 +61,7 @@ export default function PassengerApp() {
             {tab === "profile" && screen === "main" && <ProfileScreen profile={data.profile} trips={data.trips} onEdit={() => setScreen("editProfile")} onPay={() => { setTab("home"); setScreen("payments"); }} onHelp={() => { setTab("home"); setScreen("support"); }} />}
             {tab === "profile" && screen === "editProfile" && <EditProfileScreen profile={data.profile} onSave={(p) => { updateProfile(p); reload(); setScreen("main"); }} onBack={() => setScreen("main")} />}
           </div>
-          <nav className="fixed bottom-0 inset-x-0 bg-black/95 border-t border-white/10 backdrop-blur flex items-center justify-around py-2 z-50">
+          <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-black/95 border-t border-white/10 backdrop-blur flex items-center justify-around py-2 z-50">
             {([["home", Home, "Inicio"], ["trips", Clock, "Viajes"], ["profile", User, "Perfil"]] as const).map(([k, I, l]) => (
               <button key={k} onClick={() => { setTab(k); setScreen("main"); }} className={`flex flex-col items-center gap-1 px-5 py-2.5 min-h-[44px] ${tab === k ? "text-[#10b981]" : "text-white/50"}`}>
                 <I className="h-5 w-5" /><span className="text-[11px]">{l}</span>
@@ -69,6 +70,7 @@ export default function PassengerApp() {
           </nav>
         </>
       )}
+    </div>
     </div>
   );
 }
