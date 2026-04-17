@@ -15,7 +15,35 @@ import {
   type UserProfile, type PaymentMethod, type TripRecord, type DriverInfo, type ServiceType,
 } from "@/lib/store";
 
-export default function PassengerApp() {
+export default function AppPage() {
+  const [mode, setMode] = useState<"passenger" | "driver">("passenger");
+  return (
+    <div className="min-h-screen bg-neutral-950 flex justify-center">
+      <div className="w-full max-w-[430px] min-h-screen bg-black text-white relative shadow-2xl shadow-black/50 flex flex-col">
+        {/* Mode switcher */}
+        <div className="bg-black px-4 pt-3 pb-2 flex items-center justify-between z-50">
+          <div className="flex items-center gap-2">
+            <div className="h-6 w-6 rounded-lg bg-[#10b981]" />
+            <span className="text-xs font-bold">Mi Taxi Jalisco</span>
+          </div>
+          <div className="flex bg-white/5 rounded-full p-0.5">
+            <button onClick={() => setMode("passenger")} className={`px-3 py-1.5 rounded-full text-[11px] font-semibold transition ${mode === "passenger" ? "bg-[#10b981] text-black" : "text-white/60"}`}>
+              Pasajero
+            </button>
+            <button onClick={() => setMode("driver")} className={`px-3 py-1.5 rounded-full text-[11px] font-semibold transition ${mode === "driver" ? "bg-[#10b981] text-black" : "text-white/60"}`}>
+              Conductor
+            </button>
+          </div>
+        </div>
+        <div className="flex-1 overflow-hidden">
+          {mode === "passenger" ? <PassengerView /> : <DriverView />}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PassengerView() {
   const [data, setData] = useState(() => loadAppData());
   const [tab, setTab] = useState<"home" | "trips" | "profile">("home");
   const [screen, setScreen] = useState("main");
@@ -25,10 +53,7 @@ export default function PassengerApp() {
   useEffect(() => {
     if (!navigator.geolocation) return;
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude: lat, longitude: lng } = pos.coords;
-        setLocation({ lat, lng, address: approxAddress(lat, lng) });
-      },
+      (pos) => setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude, address: approxAddress(pos.coords.latitude, pos.coords.longitude) }),
       () => setLocation({ lat: 20.6597, lng: -103.3496, address: "Guadalajara, Jalisco" }),
       { enableHighAccuracy: false, timeout: 5000 }
     );
@@ -41,19 +66,12 @@ export default function PassengerApp() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 flex justify-center">
-    <div className="w-full max-w-[430px] min-h-screen bg-black text-white relative shadow-2xl shadow-black/50">
-      <div className="bg-black px-5 pt-3 pb-1 flex items-center justify-between text-[11px] text-white/60">
-        <span>{new Date().toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}</span>
-        <span className="font-semibold text-white text-xs">Mi Taxi Jalisco</span>
-        <span>●●●○ 🔋</span>
-      </div>
-
+    <div className="h-full flex flex-col">
       {trip ? (
         <ActiveTrip trip={trip} setTrip={setTrip} location={location} onComplete={(r) => { addTrip(r); reload(); setTrip(null); }} />
       ) : (
         <>
-          <div className="pb-20 overflow-y-auto">
+          <div className="flex-1 pb-16 overflow-y-auto">
             {tab === "home" && screen === "main" && <HomeScreen profile={data.profile} location={location} payments={data.payments} onRequestTrip={(d, s, f, n, p) => setTrip({ status: "searching", origin: location?.address || "Tu ubicación", destination: d, service: s, baseFare: f, offeredFare: n, paymentMethod: p, driver: null, progress: 0 })} />}
             {tab === "home" && screen === "payments" && <PaymentsScreen payments={data.payments} onUpdate={(p) => { updatePayments(p); reload(); }} onBack={() => setScreen("main")} />}
             {tab === "home" && screen === "support" && <SupportScreen onBack={() => setScreen("main")} />}
@@ -61,9 +79,9 @@ export default function PassengerApp() {
             {tab === "profile" && screen === "main" && <ProfileScreen profile={data.profile} trips={data.trips} onEdit={() => setScreen("editProfile")} onPay={() => { setTab("home"); setScreen("payments"); }} onHelp={() => { setTab("home"); setScreen("support"); }} />}
             {tab === "profile" && screen === "editProfile" && <EditProfileScreen profile={data.profile} onSave={(p) => { updateProfile(p); reload(); setScreen("main"); }} onBack={() => setScreen("main")} />}
           </div>
-          <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-black/95 border-t border-white/10 backdrop-blur flex items-center justify-around py-2 z-50">
+          <nav className="border-t border-white/10 bg-black flex items-center justify-around py-2">
             {([["home", Home, "Inicio"], ["trips", Clock, "Viajes"], ["profile", User, "Perfil"]] as const).map(([k, I, l]) => (
-              <button key={k} onClick={() => { setTab(k); setScreen("main"); }} className={`flex flex-col items-center gap-1 px-5 py-2.5 min-h-[44px] ${tab === k ? "text-[#10b981]" : "text-white/50"}`}>
+              <button key={k} onClick={() => { setTab(k); setScreen("main"); }} className={`flex flex-col items-center gap-1 px-5 py-2 min-h-[44px] ${tab === k ? "text-[#10b981]" : "text-white/50"}`}>
                 <I className="h-5 w-5" /><span className="text-[11px]">{l}</span>
               </button>
             ))}
@@ -71,6 +89,209 @@ export default function PassengerApp() {
         </>
       )}
     </div>
+  );
+}
+
+/* ================================================================ */
+/*  DRIVER VIEW                                                      */
+/* ================================================================ */
+
+function DriverView() {
+  const [online, setOnline] = useState(true);
+  const [tab, setTab] = useState<"home" | "history" | "profile">("home");
+  const [incomingTrip, setIncomingTrip] = useState<{ origin: string; destination: string; fare: number; user: string; userRating: number } | null>(null);
+  const [activeTrip, setActiveTrip] = useState<{ status: "going" | "waiting" | "inProgress" | "done"; origin: string; destination: string; fare: number; user: string; progress: number } | null>(null);
+
+  // Simulate incoming trip request every 15s when online and idle
+  useEffect(() => {
+    if (!online || incomingTrip || activeTrip) return;
+    const t = setTimeout(() => {
+      setIncomingTrip({
+        origin: "Col. Americana, GDL",
+        destination: "Plaza del Sol, Zapopan",
+        fare: 68,
+        user: "Sofía R.",
+        userRating: 4.9,
+      });
+    }, 8000);
+    return () => clearTimeout(t);
+  }, [online, incomingTrip, activeTrip]);
+
+  // Progress for active trip
+  useEffect(() => {
+    if (!activeTrip || activeTrip.status !== "inProgress") return;
+    const id = setInterval(() => {
+      setActiveTrip((prev) => {
+        if (!prev || prev.progress >= 1) return prev ? { ...prev, status: "done", progress: 1 } : prev;
+        return { ...prev, progress: prev.progress + 0.02 };
+      });
+    }, 300);
+    return () => clearInterval(id);
+  }, [activeTrip?.status]);
+
+  const earnings = { today: 842, trips: 11, week: 5428 };
+
+  return (
+    <div className="h-full flex flex-col">
+      <div className="flex-1 pb-16 overflow-y-auto">
+        {tab === "home" && (
+          <div className="px-5 pt-4">
+            {/* Driver header */}
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <div className="text-xs text-white/60">Conductor</div>
+                <div className="text-lg font-bold">Roberto Mendoza</div>
+                <div className="text-[11px] text-white/50">Nissan Tsuru · JAL-1234 · Sitio 42</div>
+              </div>
+              <button onClick={() => setOnline(!online)} className={`h-8 w-14 rounded-full p-0.5 transition ${online ? "bg-[#10b981]" : "bg-white/20"}`}>
+                <div className={`h-7 w-7 rounded-full bg-white transition-transform ${online ? "translate-x-6" : ""}`} />
+              </button>
+            </div>
+
+            {/* Status */}
+            <div className={`rounded-xl p-4 mb-4 text-center ${online ? "bg-[#10b981]/10 border border-[#10b981]/30" : "bg-white/5"}`}>
+              <div className={`text-lg font-bold ${online ? "text-[#10b981]" : "text-white/50"}`}>
+                {online ? "🟢 En línea" : "⚫ Fuera de línea"}
+              </div>
+              <div className="text-[11px] text-white/60 mt-1">
+                {online ? "Esperando solicitudes de viaje…" : "No recibirás solicitudes"}
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-2 mb-4">
+              <div className="bg-white/5 rounded-xl p-3 text-center"><div className="text-[11px] text-white/50">Hoy</div><div className="font-bold text-[#10b981]">${earnings.today}</div></div>
+              <div className="bg-white/5 rounded-xl p-3 text-center"><div className="text-[11px] text-white/50">Viajes</div><div className="font-bold">{earnings.trips}</div></div>
+              <div className="bg-white/5 rounded-xl p-3 text-center"><div className="text-[11px] text-white/50">Semana</div><div className="font-bold text-[#10b981]">${earnings.week}</div></div>
+            </div>
+
+            {/* Map */}
+            <RealMap progress={0} showCar={false} className="h-[200px] mb-4" interactive />
+
+            {/* Incoming trip */}
+            {incomingTrip && !activeTrip && (
+              <motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="bg-white/5 rounded-2xl p-4 border-2 border-[#10b981]/50 mb-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="h-2 w-2 rounded-full bg-[#10b981] animate-pulse" />
+                  <span className="text-xs text-[#10b981] font-bold uppercase tracking-wider">Nueva solicitud</span>
+                </div>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="h-10 w-10 rounded-full bg-[#10b981]/20 flex items-center justify-center"><User className="h-5 w-5 text-[#10b981]" /></div>
+                  <div><div className="font-bold">{incomingTrip.user}</div><div className="text-[11px] text-white/60 flex items-center gap-1"><Star className="h-3 w-3 text-yellow-400 fill-yellow-400" /> {incomingTrip.userRating}</div></div>
+                </div>
+                <div className="text-xs space-y-1 mb-3">
+                  <div className="flex items-center gap-2"><div className="h-2 w-2 rounded-full bg-[#10b981]" /> {incomingTrip.origin}</div>
+                  <div className="flex items-center gap-2"><div className="h-2 w-2 rounded-full border border-[#10b981]" /> {incomingTrip.destination}</div>
+                </div>
+                <div className="flex items-center justify-between mb-3">
+                  <div><div className="text-[11px] text-white/50">Ganancia (90%)</div><div className="text-xl font-bold text-[#10b981]">${Math.round(incomingTrip.fare * 0.9)}</div></div>
+                  <div className="text-right text-[11px] text-white/50">8.4 km · ~18 min</div>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => setIncomingTrip(null)} className="flex-1 rounded-xl bg-white/5 py-3 text-sm font-semibold">Rechazar</button>
+                  <button onClick={() => { setActiveTrip({ status: "going", origin: incomingTrip.origin, destination: incomingTrip.destination, fare: incomingTrip.fare, user: incomingTrip.user, progress: 0 }); setIncomingTrip(null); }} className="flex-1 rounded-xl bg-[#10b981] py-3 text-black text-sm font-bold">Aceptar</button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Active trip (driver side) */}
+            {activeTrip && (
+              <div className="bg-white/5 rounded-2xl p-4 mb-4">
+                <div className="text-xs text-[#10b981] font-bold uppercase mb-2">
+                  {activeTrip.status === "going" && "En camino al pasajero"}
+                  {activeTrip.status === "waiting" && "Esperando al pasajero"}
+                  {activeTrip.status === "inProgress" && "Viaje en curso"}
+                  {activeTrip.status === "done" && "Viaje completado"}
+                </div>
+
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="h-10 w-10 rounded-full bg-[#10b981]/20 flex items-center justify-center"><User className="h-5 w-5 text-[#10b981]" /></div>
+                  <div><div className="font-bold">{activeTrip.user}</div><div className="text-[11px] text-white/50">{activeTrip.origin} → {activeTrip.destination}</div></div>
+                </div>
+
+                {activeTrip.status === "inProgress" && (
+                  <div className="mb-3">
+                    <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+                      <div className="h-full bg-[#10b981] transition-all" style={{ width: `${activeTrip.progress * 100}%` }} />
+                    </div>
+                    <div className="flex justify-between text-[11px] text-white/50 mt-1">
+                      <span>{Math.round(activeTrip.progress * 8.4)} km</span>
+                      <span>ETA: {Math.max(1, Math.round(18 * (1 - activeTrip.progress)))} min</span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between mb-3">
+                  <div><div className="text-[11px] text-white/50">Ganancia</div><div className="text-xl font-bold text-[#10b981]">${Math.round(activeTrip.fare * 0.9)}</div></div>
+                  <div className="text-right"><div className="text-[11px] text-white/50">Tarifa</div><div className="text-sm">${activeTrip.fare}</div></div>
+                </div>
+
+                {activeTrip.status === "going" && (
+                  <button onClick={() => setActiveTrip({ ...activeTrip, status: "waiting" })} className="w-full rounded-xl bg-white/10 py-3 text-sm font-semibold">Ya llegué al punto</button>
+                )}
+                {activeTrip.status === "waiting" && (
+                  <button onClick={() => setActiveTrip({ ...activeTrip, status: "inProgress", progress: 0 })} className="w-full rounded-xl bg-[#10b981] py-3 text-black text-sm font-bold">Pasajero abordó · Iniciar</button>
+                )}
+                {activeTrip.status === "done" && (
+                  <div className="text-center">
+                    <CheckCircle2 className="h-10 w-10 text-[#10b981] mx-auto mb-2" />
+                    <div className="font-bold">¡Viaje completado!</div>
+                    <div className="text-[11px] text-white/50 mt-1">Pago: $61 depositado en 24h</div>
+                    <button onClick={() => setActiveTrip(null)} className="mt-3 rounded-xl bg-white/10 px-5 py-2 text-sm">Continuar</button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {tab === "history" && (
+          <div className="px-5 pt-4">
+            <div className="text-lg font-bold mb-4">Historial</div>
+            {[
+              { dest: "Plaza del Sol", user: "Sofía R.", fare: 68, date: "Hoy 14:30" },
+              { dest: "Andares", user: "Carlos H.", fare: 95, date: "Hoy 12:15" },
+              { dest: "Aeropuerto", user: "María L.", fare: 280, date: "Ayer 06:00" },
+              { dest: "Tlaquepaque", user: "Issac V.", fare: 62, date: "16 abr 18:40" },
+            ].map((t, i) => (
+              <div key={i} className="bg-white/[0.03] rounded-xl p-4 mb-2 flex items-center justify-between">
+                <div><div className="text-sm font-medium">{t.dest}</div><div className="text-[11px] text-white/50">{t.user} · {t.date}</div></div>
+                <div className="text-right"><div className="font-bold text-[#10b981]">+${Math.round(t.fare * 0.9)}</div><div className="text-[11px] text-white/50">${t.fare} tarifa</div></div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {tab === "profile" && (
+          <div className="px-5 pt-4">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="h-16 w-16 rounded-full bg-[#10b981]/20 flex items-center justify-center"><Car className="h-8 w-8 text-[#10b981]" /></div>
+              <div><div className="font-bold text-lg">Roberto Mendoza</div><div className="text-xs text-white/60">⭐ 4.97 · 1,284 viajes · Sitio 42</div></div>
+            </div>
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              <div className="bg-white/5 rounded-xl p-3"><div className="text-[11px] text-white/50">Score seguridad</div><div className="font-bold text-lg text-[#10b981]">98</div></div>
+              <div className="bg-white/5 rounded-xl p-3"><div className="text-[11px] text-white/50">Verificación</div><div className="font-bold text-sm text-[#10b981]">✓ 7/7 filtros</div></div>
+            </div>
+            <div className="space-y-1 text-sm">
+              {["Nissan Tsuru 2018 Blanco · JAL-1234", "Seguro vigente ✓", "INE verificada con RENAPO ✓", "Biometría activa ✓", "Cuenta BBVA •••• 4821", "Zona: Providencia / Zapopan"].map((item, i) => (
+                <div key={i} className="flex items-center gap-2 p-3 bg-white/[0.02] rounded-lg">
+                  <div className="h-1.5 w-1.5 rounded-full bg-[#10b981]" />
+                  <span className="text-white/80">{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Driver bottom nav */}
+      <nav className="border-t border-white/10 bg-black flex items-center justify-around py-2">
+        {([["home", Home, "Inicio"], ["history", Clock, "Historial"], ["profile", Car, "Perfil"]] as const).map(([k, I, l]) => (
+          <button key={k} onClick={() => setTab(k)} className={`flex flex-col items-center gap-1 px-5 py-2 min-h-[44px] ${tab === k ? "text-[#10b981]" : "text-white/50"}`}>
+            <I className="h-5 w-5" /><span className="text-[11px]">{l}</span>
+          </button>
+        ))}
+      </nav>
     </div>
   );
 }
